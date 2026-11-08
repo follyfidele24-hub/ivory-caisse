@@ -1,5 +1,9 @@
 # Ivory Caisse — Journal des changements
 
+## 2.2.1
+
+- Logos officiels Wave, Orange Money, MTN MoMo et Moov Money (écran Premium, tarifs, pied de page), vignettes 16:9 WebP (~20 Ko au total, disponibles hors-ligne).
+
 ## 2.2.0
 
 ### Paiement Premium sécurisé (CinetPay)

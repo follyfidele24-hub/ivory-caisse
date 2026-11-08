@@ -170,15 +170,16 @@ export default function Premium({ onClose, initialStep = "plans" }: { onClose: (
 
               <ul className="mt-6 grid grid-cols-2 gap-2.5" aria-label="Moyens de paiement acceptés">
                 {PAYMENTS.map((m) => (
-                  <li key={m.name} className="card flex items-center gap-3 p-3.5">
-                    <span
-                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl font-display text-[11px] font-extrabold text-white"
-                      style={{ background: m.color }}
-                      aria-hidden="true"
-                    >
-                      {m.short}
-                    </span>
-                    <span className="text-sm font-bold">{m.name}</span>
+                  <li key={m.name} className="overflow-hidden rounded-2xl border border-line shadow-sm">
+                    <img
+                      src={m.logo}
+                      alt={m.name}
+                      width={320}
+                      height={180}
+                      loading="lazy"
+                      decoding="async"
+                      className="block aspect-[16/9] w-full object-cover"
+                    />
                   </li>
                 ))}
               </ul>

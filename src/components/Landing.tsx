@@ -560,13 +560,16 @@ export default function Landing({ onStart }: { onStart: () => void }) {
           </h2>
           <div className="mt-6 flex flex-wrap items-center gap-2">
             {PAYMENTS.map((p) => (
-              <span
+              <img
                 key={p.name}
-                className="rounded-full border border-line bg-panel px-3 py-1.5 text-xs font-bold"
-                style={{ color: p.color }}
-              >
-                {p.name}
-              </span>
+                src={p.logo}
+                alt={p.name}
+                width={320}
+                height={180}
+                loading="lazy"
+                decoding="async"
+                className="h-10 w-auto rounded-lg border border-line"
+              />
             ))}
           </div>
         </motion.div>
@@ -708,13 +711,16 @@ export default function Landing({ onStart }: { onStart: () => void }) {
             </div>
             <div className="flex flex-wrap items-center gap-3">
               {PAYMENTS.map((p) => (
-                <span
+                <img
                   key={p.name}
-                  className="flex h-8 w-8 items-center justify-center rounded-xl border border-line bg-panel text-[10px] font-extrabold"
-                  style={{ color: p.color }}
-                >
-                  {p.short}
-                </span>
+                  src={p.logo}
+                  alt={p.name}
+                  width={320}
+                  height={180}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-8 w-auto rounded-md"
+                />
               ))}
             </div>
           </div>

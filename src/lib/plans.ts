@@ -59,9 +59,10 @@ export const PLANS: PlanDef[] = [
   },
 ];
 
-export const PAYMENTS: { name: string; color: string; short: string }[] = [
-  { name: "Wave", color: "#1dc4f2", short: "W" },
-  { name: "Orange Money", color: "#ff7900", short: "OM" },
-  { name: "MTN MoMo", color: "#ffcc00", short: "MM" },
-  { name: "Moov Money", color: "#0066b3", short: "Mv" },
+/** Moyens de paiement acceptés via CinetPay — logos 16:9 dans public/payments/ */
+export const PAYMENTS: { name: string; color: string; short: string; logo: string }[] = [
+  { name: "Wave", color: "#1dc4f2", short: "W", logo: "./payments/wave.webp" },
+  { name: "Orange Money", color: "#ff7900", short: "OM", logo: "./payments/orange-money.webp" },
+  { name: "MTN MoMo", color: "#ffcc00", short: "MM", logo: "./payments/mtn-momo.webp" },
+  { name: "Moov Money", color: "#0066b3", short: "Mv", logo: "./payments/moov-money.webp" },
 ];
