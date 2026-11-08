@@ -1,19 +1,27 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Check, Crown, Loader2, ShieldCheck, Sparkles, X } from "lucide-react";
 import { PLANS, PAYMENTS, type PlanDef } from "../lib/plans";
-import { cinetpayReady, payWithCinetPay } from "../lib/cinetpay";
+import { paymentsEnabled, startPayment } from "../lib/payments";
+import { longDate } from "../lib/format";
 import { useStore } from "../lib/store";
 import { Btn } from "./ui";
 import { Capacitor } from "@capacitor/core";
 
 type Step = "plans" | "pay" | "store" | "success";
 
-export default function Premium({ onClose }: { onClose: () => void }) {
+export default function Premium({ onClose, initialStep = "plans" }: { onClose: () => void; initialStep?: Step }) {
   const { profile, setPlan } = useStore();
-  const [step, setStep] = useState<Step>("plans");
+  const [step, setStep] = useState<Step>(initialStep);
+  const [online, setOnline] = useState<boolean | null>(null);
+  useEffect(() => {
+    let alive = true;
+    paymentsEnabled().then((v) => alive && setOnline(v));
+    return () => {
+      alive = false;
+    };
+  }, []);
   const [chosen, setChosen] = useState<PlanDef | null>(null);
-  const [method, setMethod] = useState(0);
   const [processing, setProcessing] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
 
@@ -32,42 +40,25 @@ export default function Premium({ onClose }: { onClose: () => void }) {
   };
 
   const pay = async () => {
-    if (!chosen || processing) return;
+    if (!chosen || processing || chosen.id === "free") return;
     setPayError(null);
-    setProcessing(true);
-    if (navigator.vibrate) navigator.vibrate(15);
-
-    const activate = () => {
-      setProcessing(false);
-      setPlan(chosen.id);
-      setStep("success");
-      if (navigator.vibrate) navigator.vibrate([20, 60, 30]);
-    };
-
-    /* Paiement réel CinetPay si les clés sont configurées */
-    if (cinetpayReady) {
-      try {
-        await payWithCinetPay({
-          transactionId: `IC-${Date.now()}`,
-          amount: chosen.amount,
-          description: `Ivory Caisse — Abonnement ${chosen.name}`,
-          customerName: profile?.name ?? "Client",
-          onSuccess: activate,
-          onError: (msg) => {
-            setProcessing(false);
-            setPayError(msg);
-          },
-        });
-      } catch {
-        setProcessing(false);
-        setPayError("Service de paiement indisponible. Réessaie dans un instant.");
-      }
+    if (!online) {
+      setPayError(
+        online === false
+          ? "Le paiement en ligne n'est pas encore ouvert. Contacte Ivory Gestion sur WhatsApp pour activer Premium."
+          : "Vérification du service de paiement… réessaie dans un instant."
+      );
       return;
     }
-
-    // Ne jamais débloquer un plan commercial sans confirmation de paiement.
-    setProcessing(false);
-    setPayError("Le paiement n'est pas encore configuré. Contacte Ivory Gestion pour activer Premium.");
+    setProcessing(true);
+    if (navigator.vibrate) navigator.vibrate(15);
+    try {
+      /* Redirige vers le guichet sécurisé CinetPay ; le retour est géré au démarrage de l'app */
+      await startPayment(chosen.id, profile?.name ?? "Client");
+    } catch (e) {
+      setProcessing(false);
+      setPayError(e instanceof Error ? e.message : "Service de paiement indisponible. Réessaie dans un instant.");
+    }
   };
 
   return (
@@ -133,8 +124,11 @@ export default function Premium({ onClose }: { onClose: () => void }) {
                           </p>
                         </div>
                         {isCurrent ? (
-                          <span className="rounded-full bg-mint/15 px-3 py-1.5 text-[10px] font-extrabold uppercase text-mint">
+                          <span className="rounded-full bg-mint/15 px-3 py-1.5 text-right text-[11px] font-extrabold uppercase text-mint">
                             Plan actuel
+                            {p.id !== "free" && profile?.premiumUntil ? (
+                              <span className="block text-[10px] font-semibold normal-case">jusqu'au {longDate(profile.premiumUntil)}</span>
+                            ) : null}
                           </span>
                         ) : (
                           <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-fg/20" />
@@ -172,39 +166,27 @@ export default function Premium({ onClose }: { onClose: () => void }) {
                 {chosen.name} · {chosen.price}
                 <span className="text-base font-bold text-muted"> {chosen.per}</span>
               </h1>
-              <p className="mt-2 text-sm text-muted">Choisis ton moyen de paiement :</p>
+              <p className="mt-2 text-sm text-muted">Tu choisis ton moyen de paiement sur la page sécurisée CinetPay :</p>
 
-              <div className="mt-6 space-y-2.5">
-                {PAYMENTS.map((m, i) => (
-                  <button
-                    key={m.name}
-                    onClick={() => setMethod(i)}
-                    className={`tap card flex w-full items-center gap-3.5 p-4 text-left transition-all ${
-                      method === i ? "border-brand/50 bg-brand/5" : ""
-                    }`}
-                  >
+              <ul className="mt-6 grid grid-cols-2 gap-2.5" aria-label="Moyens de paiement acceptés">
+                {PAYMENTS.map((m) => (
+                  <li key={m.name} className="card flex items-center gap-3 p-3.5">
                     <span
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl font-display text-xs font-extrabold text-white"
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl font-display text-[11px] font-extrabold text-white"
                       style={{ background: m.color }}
+                      aria-hidden="true"
                     >
                       {m.short}
                     </span>
-                    <span className="flex-1 text-sm font-bold">{m.name}</span>
-                    <span
-                      className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-colors ${
-                        method === i ? "border-brand bg-brand" : "border-fg/20"
-                      }`}
-                    >
-                      {method === i && <Check size={12} className="text-white" />}
-                    </span>
-                  </button>
+                    <span className="text-sm font-bold">{m.name}</span>
+                  </li>
                 ))}
-              </div>
+              </ul>
 
               <Btn onClick={pay} disabled={processing} className="mt-7 w-full py-4 text-base">
                 {processing ? (
                   <>
-                    <Loader2 size={18} className="animate-spin" /> Connexion {PAYMENTS[method].name}…
+                    <Loader2 size={18} className="animate-spin" /> Ouverture du paiement sécurisé…
                   </>
                 ) : (
                   <>
@@ -216,9 +198,9 @@ export default function Premium({ onClose }: { onClose: () => void }) {
               {payError && <p className="mt-4 text-center text-xs font-semibold text-rose">{payError}</p>}
 
               <p className="mt-4 text-center text-[11px] leading-relaxed text-muted">
-                {cinetpayReady
-                  ? "Tu vas recevoir une demande de confirmation directement sur ton téléphone."
-                  : "Mode démo : ajoute tes clés CinetPay dans .env pour encaisser de vrais paiements."}
+                {online === false
+                  ? "Paiement en ligne bientôt disponible."
+                  : "Après validation sur ton téléphone, reviens dans l'app : Premium s'active automatiquement."}
               </p>
             </motion.div>
           )}

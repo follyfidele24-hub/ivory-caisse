@@ -78,6 +78,10 @@ export interface Profile {
   lastBackup?: number;
   /** Rappel de sauvegarde repoussé jusqu'à cette date */
   backupSnooze?: number;
+  /** Fin de l'abonnement Premium (null = à vie, absent = gratuit) */
+  premiumUntil?: number | null;
+  /** Dernière transaction de paiement confirmée */
+  lastPaymentTx?: string;
   /** true tant que les données d'exemple de l'inscription sont présentes */
   demo?: boolean;
 }

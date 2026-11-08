@@ -5,6 +5,8 @@ import { fmtF } from "./lib/format";
 import { setCurrency } from "./lib/currency";
 import { applyTheme } from "./lib/themes";
 import { NATIVE_SECURE_RESUME } from "./lib/native";
+import { clearPending, getPending, verifyPayment } from "./lib/payments";
+import { longDate } from "./lib/format";
 import Dashboard from "./components/Dashboard";
 import AddTxn from "./components/AddTxn";
 
@@ -37,7 +39,8 @@ import BottomNav, { type Tab } from "./components/BottomNav";
 import { Toast } from "./components/ui";
 
 function AppShell() {
-  const { profile, deleteTxn } = useStore();
+  const { profile, deleteTxn, updateProfile, setPlan } = useStore();
+  const [premiumStep, setPremiumStep] = useState<"plans" | "success">("plans");
   const toastTimer = useRef<number | undefined>(undefined);
   const [tab, setTab] = useState<Tab>("home");
   const [addOpen, setAddOpen] = useState(false);
@@ -54,6 +57,67 @@ function AppShell() {
   useEffect(() => {
     const id = window.setTimeout(prefetchTabs, 1500);
     return () => window.clearTimeout(id);
+  }, []);
+
+  /* ---------- Abonnement : expiration ---------- */
+  useEffect(() => {
+    if (!profile || profile.plan === "free" || profile.plan === "life") return;
+    if (typeof profile.premiumUntil === "number" && profile.premiumUntil < Date.now()) {
+      setPlan("free");
+      updateProfile({ premiumUntil: undefined });
+      showToast({ msg: "Ton Premium a expiré — renouvelle-le quand tu veux", kind: "info" }, 4000);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.plan, profile?.premiumUntil]);
+
+  /* ---------- Retour de paiement CinetPay (ou paiement resté en attente) ---------- */
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const fromUrl = url.searchParams.get("paiement") === "retour" ? url.searchParams.get("tx") : null;
+    const pending = getPending();
+    const tx = fromUrl ?? pending?.tx;
+    if (fromUrl || url.searchParams.has("paiement")) {
+      url.searchParams.delete("paiement");
+      url.searchParams.delete("tx");
+      window.history.replaceState(null, "", url.pathname + (url.search === "?" ? "" : url.search) + url.hash);
+    }
+    if (!tx) return;
+    if (fromUrl) showToast({ msg: "Vérification de ton paiement…", kind: "info" }, 6000);
+    let alive = true;
+    (async () => {
+      /* CinetPay peut mettre quelques secondes à confirmer : 4 essais espacés */
+      for (let i = 0; i < 4 && alive; i++) {
+        const r = await verifyPayment(tx);
+        if (!alive) return;
+        if (r.status === "paid") {
+          clearPending();
+          updateProfile({ plan: r.plan, premiumUntil: r.until, lastPaymentTx: tx });
+          setPremiumStep("success");
+          setPremiumOpen(true);
+          showToast(
+            { msg: r.until ? `Premium actif jusqu'au ${longDate(r.until)}` : "Premium à vie activé", kind: "sale" },
+            4000
+          );
+          return;
+        }
+        if (r.status === "refused") {
+          clearPending();
+          if (fromUrl) showToast({ msg: "Paiement non abouti — aucun montant n'a été validé", kind: "expense" }, 4500);
+          return;
+        }
+        if (r.status === "error") {
+          if (fromUrl) showToast({ msg: r.message, kind: "info" }, 4500);
+          return;
+        }
+        await new Promise((res) => window.setTimeout(res, 3000));
+      }
+      if (alive && fromUrl)
+        showToast({ msg: "Paiement en attente de confirmation — on revérifie à la prochaine ouverture", kind: "info" }, 5000);
+    })();
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -112,7 +176,17 @@ function AppShell() {
       <AddTxn open={addOpen} onClose={() => setAddOpen(false)} onSaved={onSaved} />
 
       <Suspense fallback={null}>
-        <AnimatePresence>{premiumOpen && <Premium onClose={() => setPremiumOpen(false)} />}</AnimatePresence>
+        <AnimatePresence>
+          {premiumOpen && (
+            <Premium
+              initialStep={premiumStep}
+              onClose={() => {
+                setPremiumOpen(false);
+                setPremiumStep("plans");
+              }}
+            />
+          )}
+        </AnimatePresence>
       </Suspense>
 
       {locked && profile?.pin && <LockScreen onUnlock={() => setLocked(false)} />}

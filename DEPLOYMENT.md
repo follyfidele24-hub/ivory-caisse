@@ -47,28 +47,27 @@ Le service worker met l'app en cache : elle s'ouvre ensuite même sans réseau.
 
 ## 4. Activer les paiements réels (CinetPay)
 
-CinetPay encaisse Wave, Orange Money, MTN MoMo et Moov Money en une seule
-intégration.
+CinetPay encaisse Wave, Orange Money, MTN MoMo, Moov Money et carte bancaire.
+Le paiement passe par une **fonction Netlify** (`netlify/functions/pay.mts`) :
+la clé API reste sur le serveur, jamais dans l'app.
 
-1. Crée un compte marchand sur https://www.cinetpay.com
-2. Fais valider ton dossier (KYC : pièce d'identité + infos commerce)
-3. Dans ton espace marchand → **Intégration / API** :
-   récupère la **clé API** et le **Site ID**
-4. À la racine du projet, copie `.env.example` en `.env` et remplis :
+1. Crée un compte marchand sur https://www.cinetpay.com et fais valider ton dossier (KYC).
+2. Espace marchand → **Intégration / API** : récupère la **clé API** et le **Site ID**.
+3. Netlify → ton projet → **Project configuration → Environment variables** → ajoute :
+   - `CINETPAY_APIKEY` = ta clé API (coche « Contains secret values »)
+   - `CINETPAY_SITE_ID` = ton Site ID
+4. Netlify → **Deploys → Trigger deploy → Deploy project** (pour prendre les variables en compte).
+5. Vérifie : `https://ivory-caisse.netlify.app/api/pay/status` doit répondre `{"enabled":true}`.
 
-```bash
-VITE_CINETPAY_APIKEY=ta_cle_api
-VITE_CINETPAY_SITE_ID=ton_site_id
-VITE_CINETPAY_VERIFY_URL=https://api.ton-domaine.com/cinetpay/verify
-```
+Fonctionnement :
+- `/api/pay/init` crée la transaction (prix fixé côté serveur) et renvoie le lien du guichet CinetPay ;
+- `/api/pay/return` ramène le client dans l'app après paiement ;
+- `/api/pay/notify` reçoit la notification CinetPay et **re-vérifie** le statut auprès de l'API ;
+- `/api/pay/verify` ne valide que si CinetPay répond `ACCEPTED` avec le bon montant en XOF,
+  et seulement pour le téléphone qui a lancé le paiement.
 
-5. Le backend de vérification doit contacter CinetPay côté serveur et répondre
-   `{ "paid": true }` uniquement après confirmation réelle.
-6. Rebuild (`npm run build`) et redéploie le dossier `dist/`
-
-Sans ces clés et une vérification serveur, aucun plan Premium n'est débloqué.
-Un paiement commercial doit être confirmé par un webhook/backend avant d'activer
-les droits : ne te fie jamais uniquement à la réponse JavaScript du téléphone.
+Les transactions sont stockées dans Netlify Blobs (magasin `ivory-payments`).
+Sans les deux variables, le paiement reste fermé et aucun Premium n'est débloqué.
 
 ---
 

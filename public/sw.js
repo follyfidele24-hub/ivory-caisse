@@ -21,6 +21,8 @@ self.addEventListener("message", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  /* API (paiement…) : toujours le réseau, jamais le cache */
+  if (new URL(event.request.url).pathname.startsWith("/api/")) return;
 
   // Navigation : réseau d'abord pour obtenir les mises à jour, cache en secours.
   if (event.request.mode === "navigate") {

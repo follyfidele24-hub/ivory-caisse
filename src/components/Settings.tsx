@@ -618,7 +618,7 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
           </div>
           <div className="flex-1">
             <p className="text-sm font-bold">Ivory Caisse</p>
-            <p className="text-xs text-muted">Version 2.1.1 · Membre depuis le {profile ? longDate(profile.created) : "—"}</p>
+            <p className="text-xs text-muted">Version 2.2.0 · Membre depuis le {profile ? longDate(profile.created) : "—"}</p>
           </div>
         </div>
         {/* Éditeur */}

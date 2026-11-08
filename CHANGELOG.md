@@ -1,5 +1,19 @@
 # Ivory Caisse — Journal des changements
 
+## 2.2.0
+
+### Paiement Premium sécurisé (CinetPay)
+- Nouvelle fonction serveur Netlify `/api/pay/*` : la clé CinetPay ne quitte plus le serveur
+  (avant : intégrée dans le code de l'app, lisible par tous).
+- Prix imposés par le serveur ; paiement validé seulement si CinetPay confirme ACCEPTED,
+  avec le bon montant en XOF.
+- Un paiement n'active Premium que sur le téléphone qui l'a lancé (avant : un même numéro
+  de transaction pouvait débloquer n'importe quel téléphone).
+- Notification CinetPay re-vérifiée auprès de l'API ; retour automatique dans l'app.
+- Paiement en attente revérifié à la réouverture.
+- Expiration des abonnements : mensuel 31 j, annuel 366 j, À vie sans fin ; date affichée.
+- Service worker : les routes `/api/` ne sont jamais mises en cache.
+
 ## 2.1.1
 
 - Icônes PWA refaites : 728 Ko → 42 Ko, vraie 192 px, icône adaptative Android, icône Apple.
