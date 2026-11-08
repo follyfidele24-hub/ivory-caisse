@@ -31,6 +31,8 @@ function precacheManifest(): Plugin {
       const keep = files.filter(
         (f) =>
           f !== "sw.js" &&
+          f !== "_headers" &&
+          f !== "_redirects" &&
           // Firebase : sauvegarde cloud = réseau obligatoire, inutile de le pré-télécharger
           !/\/firebase-/.test(f) &&
           !f.endsWith(".map") &&

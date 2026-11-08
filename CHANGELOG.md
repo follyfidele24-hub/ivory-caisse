@@ -1,5 +1,11 @@
 # Ivory Caisse — Journal des changements
 
+## 2.1.1
+
+- Icônes PWA refaites : 728 Ko → 42 Ko, vraie 192 px, icône adaptative Android, icône Apple.
+- Fichier `_headers` publié avec le site (Netlify Drop) : type correct du manifest, cache des fichiers.
+- Service worker : `_headers` / `_redirects` exclus du pré-cache.
+
 ## 2.1.0
 
 ### Vitesse
