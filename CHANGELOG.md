@@ -1,5 +1,17 @@
 # Ivory Caisse — Journal des changements
 
+## 2.3.0
+
+### Premium par licence Chariow (sans compte marchand CinetPay)
+- 3 licences en vente sur la boutique Ivory Gestion : Mensuel 2 000 F (31 j), Annuel 15 000 F (366 j), À vie 25 000 F.
+- « Payer » ouvre la page Chariow de la formule ; l'app passe à l'étape « Active ta clé ».
+- Nouvelle fonction serveur `/api/license/*` : vérifie la clé auprès de Chariow, n'accepte que les 3 produits
+  Ivory Caisse, active 2 téléphones maximum, sans consommer de place quand on réinstalle sur le même téléphone.
+- Date de fin fournie par Chariow ; clés stockées hachées côté serveur.
+- Revérification automatique une fois par jour : licence annulée/remboursée/expirée → retour au gratuit.
+- CinetPay reste prioritaire s'il est configuré un jour (CINETPAY_APIKEY / CINETPAY_SITE_ID).
+- Correctif : les refus métier ne répondent plus en 404/403 (Netlify les interceptait), mais en 422/409.
+
 ## 2.2.1
 
 - Logos officiels Wave, Orange Money, MTN MoMo et Moov Money (écran Premium, tarifs, pied de page), vignettes 16:9 WebP (~20 Ko au total, disponibles hors-ligne).

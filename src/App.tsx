@@ -5,7 +5,7 @@ import { fmtF } from "./lib/format";
 import { setCurrency } from "./lib/currency";
 import { applyTheme } from "./lib/themes";
 import { NATIVE_SECURE_RESUME } from "./lib/native";
-import { clearPending, getPending, verifyPayment } from "./lib/payments";
+import { clearPending, getPending, recheckLicense, verifyPayment } from "./lib/payments";
 import { longDate } from "./lib/format";
 import Dashboard from "./components/Dashboard";
 import AddTxn from "./components/AddTxn";
@@ -69,6 +69,29 @@ function AppShell() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.plan, profile?.premiumUntil]);
+
+  /* ---------- Licence Chariow : revérifiée une fois par jour (annulation, remboursement) ---------- */
+  useEffect(() => {
+    const key = profile?.licenseKey;
+    if (!key || !navigator.onLine) return;
+    if (Date.now() - (profile?.licenseCheckedAt ?? 0) < 24 * 3600 * 1000) return;
+    let alive = true;
+    recheckLicense(key).then((r) => {
+      if (!alive) return;
+      if (r.ok) {
+        updateProfile({ plan: r.plan, premiumUntil: r.until, licenseCheckedAt: Date.now() });
+      } else if (!r.network && r.code !== "disabled") {
+        /* Licence annulée, expirée ou retirée de ce téléphone */
+        setPlan("free");
+        updateProfile({ licenseKey: undefined, premiumUntil: undefined, licenseCheckedAt: Date.now() });
+        showToast({ msg: r.error, kind: "info" }, 4500);
+      }
+    });
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.licenseKey]);
 
   /* ---------- Retour de paiement CinetPay (ou paiement resté en attente) ---------- */
   useEffect(() => {

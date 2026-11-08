@@ -45,6 +45,14 @@ Le service worker met l'app en cache : elle s'ouvre ensuite même sans réseau.
 
 ---
 
+## 3 bis. Licences Premium via Chariow (mode actuel)
+
+1. Chariow → Paramètres → Développeur → Clés API → **Créer une clé API** (droits licences : lecture + écriture).
+2. Netlify → Project configuration → Environment variables → `CHARIOW_API_KEY` = la clé (secret).
+3. Deploys → Trigger deploy. Vérifie `https://ivory-caisse.netlify.app/api/license/status` → `{"enabled":true}`.
+
+Produits reliés (netlify/lib/licenseCore.ts) : prd_ewwwyub0 (Mensuel), prd_h95p8e2k (Annuel), prd_8e5bj3vn (À vie).
+
 ## 4. Activer les paiements réels (CinetPay)
 
 CinetPay encaisse Wave, Orange Money, MTN MoMo, Moov Money et carte bancaire.

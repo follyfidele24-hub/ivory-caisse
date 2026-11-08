@@ -98,7 +98,7 @@ export async function verifyPayment(tx: string): Promise<VerifyResult> {
       until?: number | null;
       error?: string;
     };
-    if (r.status === 404) return { status: "refused" };
+    if (r.status === 422 || r.status === 403 || r.status === 404) return { status: "refused" };
     if (!r.ok) return { status: "error", message: b.error ?? "Vérification impossible" };
     if (b.status === "paid" && b.plan) return { status: "paid", plan: b.plan, until: b.until ?? null };
     if (b.status === "refused") return { status: "refused" };
@@ -107,3 +107,49 @@ export async function verifyPayment(tx: string): Promise<VerifyResult> {
     return { status: "error", message: "Pas de connexion. On revérifiera à la prochaine ouverture." };
   }
 }
+
+/* ================= Licences Chariow (clé reçue par e-mail) ================= */
+
+export async function licensesEnabled(): Promise<boolean> {
+  try {
+    const r = await fetch("/api/license/status", { cache: "no-store" });
+    if (!r.ok) return false;
+    return Boolean(((await r.json()) as { enabled?: boolean }).enabled);
+  } catch {
+    return false;
+  }
+}
+
+export type LicenseResult =
+  | { ok: true; plan: PaidPlan; until: number | null; devicesLeft?: number }
+  | { ok: false; code: string; error: string; network?: boolean };
+
+async function licenseCall(route: "activate" | "recheck", key: string): Promise<LicenseResult> {
+  try {
+    const r = await fetch(`/api/license/${route}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key, device: deviceId() }),
+    });
+    const b = (await r.json().catch(() => ({}))) as {
+      ok?: boolean;
+      plan?: PaidPlan;
+      until?: number | null;
+      devicesLeft?: number;
+      code?: string;
+      error?: string;
+    };
+    if (r.ok && b.ok && b.plan) return { ok: true, plan: b.plan, until: b.until ?? null, devicesLeft: b.devicesLeft };
+    return {
+      ok: false,
+      code: b.code ?? String(r.status),
+      error: b.error ?? "Activation impossible pour le moment",
+      network: r.status >= 500,
+    };
+  } catch {
+    return { ok: false, code: "network", error: "Pas de connexion. Active tes données et réessaie.", network: true };
+  }
+}
+
+export const activateLicense = (key: string) => licenseCall("activate", key);
+export const recheckLicense = (key: string) => licenseCall("recheck", key);

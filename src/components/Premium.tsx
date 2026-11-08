@@ -1,22 +1,28 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, Check, Crown, Loader2, ShieldCheck, Sparkles, X } from "lucide-react";
+import { ArrowLeft, Check, Crown, ExternalLink, KeyRound, Loader2, ShieldCheck, Sparkles, X } from "lucide-react";
 import { PLANS, PAYMENTS, type PlanDef } from "../lib/plans";
-import { paymentsEnabled, startPayment } from "../lib/payments";
+import { activateLicense, licensesEnabled, paymentsEnabled, startPayment } from "../lib/payments";
 import { longDate } from "../lib/format";
 import { useStore } from "../lib/store";
 import { Btn } from "./ui";
 import { Capacitor } from "@capacitor/core";
 
-type Step = "plans" | "pay" | "store" | "success";
+type Step = "plans" | "pay" | "store" | "key" | "success";
 
 export default function Premium({ onClose, initialStep = "plans" }: { onClose: () => void; initialStep?: Step }) {
-  const { profile, setPlan } = useStore();
+  const { profile, setPlan, updateProfile } = useStore();
+  const [licOn, setLicOn] = useState<boolean | null>(null);
+  const [keyInput, setKeyInput] = useState("");
+  const [keyBusy, setKeyBusy] = useState(false);
+  const [keyError, setKeyError] = useState<string | null>(null);
+  const [opened, setOpened] = useState(false);
   const [step, setStep] = useState<Step>(initialStep);
   const [online, setOnline] = useState<boolean | null>(null);
   useEffect(() => {
     let alive = true;
     paymentsEnabled().then((v) => alive && setOnline(v));
+    licensesEnabled().then((v) => alive && setLicOn(v));
     return () => {
       alive = false;
     };
@@ -42,6 +48,14 @@ export default function Premium({ onClose, initialStep = "plans" }: { onClose: (
   const pay = async () => {
     if (!chosen || processing || chosen.id === "free") return;
     setPayError(null);
+    /* Pas de CinetPay : achat de la licence sur la boutique Chariow */
+    if (!online && chosen.chariowUrl) {
+      window.open(chosen.chariowUrl, "_blank", "noopener");
+      setOpened(true);
+      setKeyError(null);
+      setStep("key");
+      return;
+    }
     if (!online) {
       setPayError(
         online === false
@@ -58,6 +72,27 @@ export default function Premium({ onClose, initialStep = "plans" }: { onClose: (
     } catch (e) {
       setProcessing(false);
       setPayError(e instanceof Error ? e.message : "Service de paiement indisponible. Réessaie dans un instant.");
+    }
+  };
+
+  const submitKey = async () => {
+    const k = keyInput.trim();
+    if (k.length < 8 || keyBusy) return;
+    setKeyBusy(true);
+    setKeyError(null);
+    const r = await activateLicense(k);
+    setKeyBusy(false);
+    if (r.ok) {
+      updateProfile({
+        plan: r.plan,
+        premiumUntil: r.until,
+        licenseKey: k.toUpperCase().replace(/\s+/g, ""),
+        licenseCheckedAt: Date.now(),
+      });
+      if (navigator.vibrate) navigator.vibrate([20, 60, 30]);
+      setStep("success");
+    } else {
+      setKeyError(r.error);
     }
   };
 
@@ -146,8 +181,20 @@ export default function Premium({ onClose, initialStep = "plans" }: { onClose: (
                 })}
               </div>
 
-              <p className="mt-6 flex items-center justify-center gap-1.5 text-center text-[11px] text-muted">
-                <ShieldCheck size={13} className="text-mint" /> Paiement sécurisé via CinetPay
+              <button
+                type="button"
+                onClick={() => {
+                  setKeyError(null);
+                  setOpened(false);
+                  setStep("key");
+                }}
+                className="tap mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-line bg-panel2 text-sm font-bold"
+              >
+                <KeyRound size={16} className="text-brand2" aria-hidden="true" /> J'ai une clé Premium
+              </button>
+
+              <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-[11px] text-muted">
+                <ShieldCheck size={13} className="text-mint" aria-hidden="true" /> Paiement sécurisé par Mobile Money
               </p>
             </motion.div>
           )}
@@ -191,7 +238,8 @@ export default function Premium({ onClose, initialStep = "plans" }: { onClose: (
                   </>
                 ) : (
                   <>
-                    Payer {chosen.price} <Sparkles size={16} />
+                    Payer {chosen.price}
+                    {!online && chosen.chariowUrl ? <ExternalLink size={16} aria-hidden="true" /> : <Sparkles size={16} aria-hidden="true" />}
                   </>
                 )}
               </Btn>
@@ -199,9 +247,80 @@ export default function Premium({ onClose, initialStep = "plans" }: { onClose: (
               {payError && <p className="mt-4 text-center text-xs font-semibold text-rose">{payError}</p>}
 
               <p className="mt-4 text-center text-[11px] leading-relaxed text-muted">
-                {online === false
-                  ? "Paiement en ligne bientôt disponible."
-                  : "Après validation sur ton téléphone, reviens dans l'app : Premium s'active automatiquement."}
+                {online
+                  ? "Après validation sur ton téléphone, reviens dans l'app : Premium s'active automatiquement."
+                  : "Tu vas payer sur la boutique officielle Ivory Gestion (Chariow). Ta clé Premium arrive par e-mail : reviens ensuite ici et touche « J'ai une clé »."}
+              </p>
+            </motion.div>
+          )}
+
+          {/* ------- ÉTAPE : CLÉ DE LICENCE ------- */}
+          {step === "key" && (
+            <motion.div key="key" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}>
+              <button
+                onClick={() => setStep("plans")}
+                className="tap mb-6 flex items-center gap-1.5 rounded-full border border-line bg-panel2 px-3.5 py-2 text-xs font-bold text-muted"
+              >
+                <ArrowLeft size={14} /> Tous les plans
+              </button>
+
+              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-3xl border border-brand/30 bg-brand/10 text-brand2">
+                <KeyRound size={26} aria-hidden="true" />
+              </div>
+              <h1 className="font-display text-3xl font-extrabold tracking-tight">Active ta clé Premium</h1>
+              <p className="mt-2 text-sm leading-relaxed text-muted">
+                {opened
+                  ? "La page de paiement s'est ouverte. Après le paiement, Chariow t'envoie ta clé par e-mail : copie-la et colle-la ici."
+                  : "Colle la clé reçue par e-mail après ton achat sur la boutique Ivory Gestion."}
+              </p>
+
+              <form
+                className="mt-6"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  void submitKey();
+                }}
+              >
+                <label className="block">
+                  <span className="mb-1.5 block text-xs font-bold text-muted">Clé de licence</span>
+                  <input
+                    value={keyInput}
+                    onChange={(e) => setKeyInput(e.target.value)}
+                    autoComplete="off"
+                    autoCapitalize="characters"
+                    spellCheck={false}
+                    placeholder="Ex : UWT5-1YOI-VK9G-WYQW"
+                    aria-invalid={Boolean(keyError)}
+                    aria-describedby={keyError ? "key-error" : undefined}
+                    className="w-full rounded-2xl border border-line bg-panel2 px-4 py-4 font-mono text-base font-bold uppercase tracking-wider outline-none transition-colors placeholder:normal-case placeholder:tracking-normal placeholder:text-fg/30 focus:border-brand/50"
+                  />
+                </label>
+                {keyError && (
+                  <p id="key-error" role="alert" className="mt-2 text-sm font-semibold text-rose">
+                    {keyError}
+                  </p>
+                )}
+                <Btn type="submit" disabled={keyBusy || keyInput.trim().length < 8 || licOn === false} className="mt-5 w-full py-4 text-base">
+                  {keyBusy ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" /> Vérification…
+                    </>
+                  ) : (
+                    <>
+                      <Check size={18} aria-hidden="true" /> Activer Premium
+                    </>
+                  )}
+                </Btn>
+              </form>
+
+              {licOn === false && (
+                <p className="mt-3 text-center text-xs font-semibold text-amber-300">
+                  L'activation par clé ouvre très bientôt. Garde ta clé, elle restera valable.
+                </p>
+              )}
+
+              <p className="mt-6 text-center text-[11px] leading-relaxed text-muted">
+                Une clé fonctionne sur 2 téléphones. Pas reçu d'e-mail ? Regarde dans les spams, ou écris au support sur WhatsApp au +225 07 59 26 09 53.
               </p>
             </motion.div>
           )}

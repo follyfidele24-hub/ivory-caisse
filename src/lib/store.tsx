@@ -80,6 +80,10 @@ export interface Profile {
   backupSnooze?: number;
   /** Fin de l'abonnement Premium (null = à vie, absent = gratuit) */
   premiumUntil?: number | null;
+  /** Clé de licence Chariow activée sur ce téléphone */
+  licenseKey?: string;
+  /** Dernière vérification de la licence auprès du serveur */
+  licenseCheckedAt?: number;
   /** Dernière transaction de paiement confirmée */
   lastPaymentTx?: string;
   /** true tant que les données d'exemple de l'inscription sont présentes */

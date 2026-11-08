@@ -10,7 +10,11 @@ export interface PlanDef {
   tag?: string;
   highlight?: boolean;
   features: string[];
+  /** Page d'achat de la licence sur la boutique Chariow Ivory Gestion */
+  chariowUrl?: string;
 }
+
+export const CHARIOW_STORE = "https://nunovjiz.mychariow.shop";
 
 const PREMIUM_FEATURES = [
   "Clients crédit illimités",
@@ -39,6 +43,7 @@ export const PLANS: PlanDef[] = [
     tag: "Populaire",
     highlight: true,
     features: PREMIUM_FEATURES,
+    chariowUrl: "https://nunovjiz.mychariow.shop/prd_ewwwyub0",
   },
   {
     id: "year",
@@ -48,6 +53,7 @@ export const PLANS: PlanDef[] = [
     per: "/ an",
     tag: "Économise 37%",
     features: PREMIUM_FEATURES,
+    chariowUrl: "https://nunovjiz.mychariow.shop/prd_h95p8e2k",
   },
   {
     id: "life",
@@ -56,6 +62,7 @@ export const PLANS: PlanDef[] = [
     amount: 25000,
     per: "une seule fois",
     features: ["Tout le Premium", "Payé une seule fois", "Mises à jour à vie", "Support prioritaire"],
+    chariowUrl: "https://nunovjiz.mychariow.shop/prd_8e5bj3vn",
   },
 ];
 

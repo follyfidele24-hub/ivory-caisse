@@ -201,9 +201,9 @@ export async function verifyForDevice(
   if (!isTx(input.tx) || !isDevice(input.device)) return { status: 400, body: { error: "Requête invalide" } };
   const rec = await kv.get(input.tx);
   /* Même réponse si inconnue ou appartenant à un autre appareil : rien à deviner */
-  if (!rec || rec.device !== input.device) return { status: 404, body: { error: "Paiement introuvable" } };
+  if (!rec || rec.device !== input.device) return { status: 422, body: { error: "Paiement introuvable" } };
   const r = await checkWithCinetPay(env, kv, fetchFn, input.tx);
-  if (!r) return { status: 404, body: { error: "Paiement introuvable" } };
+  if (!r) return { status: 422, body: { error: "Paiement introuvable" } };
   return {
     status: 200,
     body: r.status === "paid" ? { status: "paid", plan: r.plan, until: r.until ?? null } : { status: r.status },
