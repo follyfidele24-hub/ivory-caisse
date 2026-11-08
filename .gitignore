@@ -1,0 +1,22 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+
+# Android / iOS generated files
+android/.gradle/
+android/local.properties
+android/**/build/
+ios/App/DerivedData/
+ios/App/build/
+
+# Never commit signing material
+*.jks
+*.keystore
+*.p12
+*.mobileprovision
+*.cer
+
+.DS_Store
+Thumbs.db

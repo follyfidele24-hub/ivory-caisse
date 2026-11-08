@@ -1,0 +1,158 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #0a0a0e;
+  --color-panel: #121218;
+  --color-panel2: #1a1a23;
+  --color-line: rgba(255, 255, 255, 0.07);
+  --color-brand: #ff7a1a;
+  --color-brand2: #ffb15c;
+  --color-deep: #e8550f;
+  --color-mint: #22c98d;
+  --color-rose: #f5516c;
+  --color-cream: #f7f3ec;
+  --color-muted: #92929f;
+  --color-wave: #1dc4f2;
+  --color-om: #ff7900;
+  --color-fg: #ffffff;
+  --color-on-mint: #06120d;
+  --font-display: "Bricolage Grotesque Variable", "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
+/* ---------- Mode clair (plein soleil) ----------
+   Contrastes texte ≥ 4,5:1 sur fond clair : vert, rouge, ambre et bleu foncés. */
+:root[data-mode="light"] {
+  color-scheme: light;
+  --color-ink: #f5f3ee;
+  --color-panel: #ffffff;
+  --color-panel2: #f0ede6;
+  --color-line: rgba(20, 20, 28, 0.1);
+  --color-cream: #17171d;
+  --color-muted: #5d5d69;
+  --color-fg: #14141a;
+  --color-mint: #0b7a54;
+  --color-on-mint: #ffffff;
+  --color-rose: #c8173f;
+  --color-amber-300: #92400e;
+  --color-sky-300: #075985;
+}
+:root[data-mode="light"] .card {
+  box-shadow: 0 1px 2px rgba(20, 20, 28, 0.04), 0 4px 16px -8px rgba(20, 20, 28, 0.08);
+}
+:root[data-mode="light"] .noise::after {
+  opacity: 0.025;
+}
+:root[data-mode="light"] ::selection {
+  color: #17171d;
+}
+
+body {
+  background: var(--color-ink);
+  color: var(--color-cream);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+::selection {
+  background: rgba(255, 122, 26, 0.35);
+  color: #fff;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.card {
+  background: var(--color-panel);
+  border: 1px solid var(--color-line);
+  border-radius: 1.5rem;
+}
+
+.tap {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.noise::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-track {
+  animation: marquee 28s linear infinite;
+}
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+.float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+.btn-press {
+  transition: transform 0.12s ease;
+}
+.btn-press:active {
+  transform: scale(0.94);
+}
+
+
+/* ---------- Focus clavier visible partout (PC, tablette avec clavier) ---------- */
+:where(button, a, input, select, textarea, [role="button"], [tabindex]):focus-visible {
+  outline: 2px solid var(--color-brand2);
+  outline-offset: 2px;
+}
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline-offset: 0;
+}
+
+/* ---------- Respect du réglage « réduire les animations » ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
