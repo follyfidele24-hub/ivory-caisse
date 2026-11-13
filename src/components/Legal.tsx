@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { ArrowLeft, AtSign, Building2, Clock, MessageCircle, Phone, ShieldCheck } from "lucide-react";
+import { CONTACT, whatsappLink } from "../lib/contact";
 
 export type LegalDoc = "terms" | "privacy" | "contact";
 
@@ -9,15 +10,6 @@ interface Section {
   items?: string[];
 }
 
-const CONTACT = {
-  structure: "Ivory Gestion",
-  product: "Ivory Caisse",
-  founder: "Fidèle Folly",
-  email: "contact@ivorygestion.com",
-  whatsapp: "+225 07 00 00 00 00",
-  whatsappNum: "2250700000000",
-  city: "Abidjan, Côte d'Ivoire",
-};
 
 const DOCS: Record<LegalDoc, { title: string; intro: string; sections: Section[] }> = {
   terms: {
@@ -146,7 +138,7 @@ export default function Legal({ doc, onClose }: { doc: LegalDoc; onClose: () => 
         {doc === "contact" ? (
           <div className="space-y-3">
             <div className="card flex items-center gap-4 p-5">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-deep font-display text-sm font-extrabold text-white">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-line bg-panel2 font-display text-sm font-extrabold text-fg">
                 IG
               </div>
               <div>
@@ -169,7 +161,7 @@ export default function Legal({ doc, onClose }: { doc: LegalDoc; onClose: () => 
             </a>
 
             <a
-              href={`https://wa.me/${CONTACT.whatsappNum}`}
+              href={whatsappLink()}
               target="_blank"
               rel="noreferrer"
               className="tap card flex items-center gap-3.5 p-4 transition-colors hover:border-brand/30"
@@ -183,15 +175,17 @@ export default function Legal({ doc, onClose }: { doc: LegalDoc; onClose: () => 
               </div>
             </a>
 
-            <a href={`tel:+${CONTACT.whatsappNum}`} className="tap card flex items-center gap-3.5 p-4 transition-colors hover:border-brand/30">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-sky-400/25 bg-sky-400/10 text-sky-300">
-                <Phone size={18} />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-bold">Téléphone</p>
-                <p className="text-xs text-muted">{CONTACT.whatsapp}</p>
-              </div>
-            </a>
+            {CONTACT.phones.map((ph) => (
+              <a key={ph.tel} href={`tel:${ph.tel}`} className="tap card flex items-center gap-3.5 p-4 transition-colors hover:border-brand/30">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-sky-400/25 bg-sky-400/10 text-sky-300">
+                  <Phone size={18} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold">Téléphone</p>
+                  <p className="text-xs text-muted tabular-nums">{ph.label}</p>
+                </div>
+              </a>
+            ))}
 
             <div className="card flex items-center gap-3.5 p-4">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-line bg-panel2 text-muted">

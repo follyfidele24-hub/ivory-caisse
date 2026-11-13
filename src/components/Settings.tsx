@@ -13,7 +13,6 @@ import {
   Moon,
   SunMedium,
   SmartphoneNfc,
-  Info,
   KeyRound,
   Loader2,
   Lock,
@@ -36,7 +35,7 @@ import { THEMES } from "../lib/themes";
 import { buildBackup, daysSinceBackup, readBackup, saveBackup, type BackupFile } from "../lib/backup";
 import type { ThemeMode } from "../lib/store";
 import { PLAN_LABEL, useStore } from "../lib/store";
-import { Avatar, Btn, Sheet, Toast } from "./ui";
+import { Avatar, BrandMark, Btn, Sheet, Toast } from "./ui";
 import CurrencyPicker from "./CurrencyPicker";
 import Legal, { type LegalDoc } from "./Legal";
 import InstallApp from "./InstallApp";
@@ -613,17 +612,15 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
           <ChevronRight size={16} className="text-muted" />
         </button>
         <div className="flex w-full items-center gap-3.5 p-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-line bg-panel2 text-muted">
-            <Info size={16} />
-          </div>
+          <BrandMark size={40} />
           <div className="flex-1">
             <p className="text-sm font-bold">Ivory Caisse</p>
-            <p className="text-xs text-muted">Version 2.3.0 · Membre depuis le {profile ? longDate(profile.created) : "—"}</p>
+            <p className="text-xs text-muted">Version 2.4.0 · Membre depuis le {profile ? longDate(profile.created) : "—"}</p>
           </div>
         </div>
         {/* Éditeur */}
         <div className="flex w-full items-center gap-3.5 bg-gradient-to-r from-brand/10 to-transparent p-4">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-deep font-display text-xs font-extrabold text-white">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-line bg-panel2 font-display text-xs font-extrabold text-fg">
             IG
           </div>
           <div className="flex-1">

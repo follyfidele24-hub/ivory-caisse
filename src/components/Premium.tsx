@@ -5,6 +5,7 @@ import { PLANS, PAYMENTS, type PlanDef } from "../lib/plans";
 import { activateLicense, licensesEnabled, paymentsEnabled, startPayment } from "../lib/payments";
 import { longDate } from "../lib/format";
 import { useStore } from "../lib/store";
+import { CONTACT, whatsappLink } from "../lib/contact";
 import { Btn } from "./ui";
 import { Capacitor } from "@capacitor/core";
 
@@ -320,7 +321,11 @@ export default function Premium({ onClose, initialStep = "plans" }: { onClose: (
               )}
 
               <p className="mt-6 text-center text-[11px] leading-relaxed text-muted">
-                Une clé fonctionne sur 2 téléphones. Pas reçu d'e-mail ? Regarde dans les spams, ou écris au support sur WhatsApp au +225 07 59 26 09 53.
+                Une clé fonctionne sur 2 téléphones. Pas reçu d'e-mail ? Regarde dans les spams, ou écris au support sur{" "}
+                <a href={whatsappLink("Bonjour, j'ai payé Ivory Caisse Premium mais je n'ai pas reçu ma clé.")} target="_blank" rel="noreferrer" className="font-bold text-mint underline underline-offset-2">
+                  WhatsApp {CONTACT.whatsapp}
+                </a>
+                .
               </p>
             </motion.div>
           )}

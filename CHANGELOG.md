@@ -1,5 +1,26 @@
 # Ivory Caisse — Journal des changements
 
+## 2.4.0
+
+### Stock fiable
+- « + Vente » propose d'abord **Article du stock** : on choisit l'article et la quantité, le montant se calcule,
+  le stock baisse. Impossible de vendre un article en rupture ou plus que la quantité restante.
+- **Montant libre** reste possible, clairement marqué « hors stock » (service, article non suivi).
+- Dépense « Marchandises » : option **Ajouter au stock** (article + quantité). Le stock monte et le prix d'achat
+  suit le dernier réassort, pour une marge juste. Supprimer cet achat retire les quantités.
+- Recherche d'article dans la caisse dès 7 produits.
+- Garde-fou côté données : un panier sans article disponible n'enregistre rien.
+
+### Correctifs
+- Clavier qui se fermait après chaque lettre dans les formulaires (fenêtres du bas) : corrigé.
+
+### Marque et contacts
+- Nouveau logo vectoriel (auvent de boutique + pièce en francs), net à toutes les tailles, aux couleurs du thème ;
+  icônes de l'app régénérées, favicon SVG.
+- Ivory Gestion (éditeur) a sa pastille neutre, distincte du produit.
+- Contacts : WhatsApp +225 07 59 26 09 53, téléphones +225 07 59 26 09 53 et +225 01 42 04 34 07,
+  siège Cocody, Abidjan. Lien WhatsApp direct depuis l'écran d'activation de clé.
+
 ## 2.3.0
 
 ### Premium par licence Chariow (sans compte marchand CinetPay)

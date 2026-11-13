@@ -1,3 +1,4 @@
+import { BrandMark } from "./ui";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Delete, Lock } from "lucide-react";
@@ -45,9 +46,7 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
       <div className="pointer-events-none absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-brand/12 blur-[100px]" />
 
       <div className="relative flex w-full max-w-xs flex-col items-center">
-        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-brand to-deep font-display text-2xl font-extrabold text-white shadow-[0_16px_40px_-12px_rgba(255,122,26,0.8)]">
-          IC
-        </div>
+        <BrandMark size={64} className="mb-4" />
         <h1 className="font-display text-2xl font-extrabold tracking-tight">Bonjour, {firstName}</h1>
         <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-muted">
           <Lock size={11} /> Entre ton code PIN

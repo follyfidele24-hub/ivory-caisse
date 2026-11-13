@@ -12,7 +12,7 @@ export interface Txn {
   ts: number;
   /** Membre de l'équipe qui a encaissé (vide = le patron) */
   seller?: string;
-  /** Lignes du ticket quand la vente vient du stock (panier) */
+  /** Lignes liées au stock : vente (sortie) ou achat de marchandises (entrée) */
   items?: TxnItem[];
   /** Date de dernière modification */
   edited?: number;
@@ -125,6 +125,8 @@ interface StoreShape {
   deleteTxn: (id: string) => void;
   updateTxn: (id: string, patch: Partial<Omit<Txn, "id">>) => void;
   sellCart: (items: { id: string; qty: number }[], seller?: string) => string | null;
+  /** Achat de marchandises : crée la dépense et remet les quantités en stock */
+  restock: (productId: string, qty: number, amount: number, note: string) => string | null;
   addClient: (name: string, phone: string, dir?: DebtDir) => void;
   addDebtMove: (debtId: string, kind: "entry" | "payment", amount: number, note: string) => void;
   removeClient: (id: string) => void;
@@ -327,13 +329,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       deleteTxn: (id) =>
         setState((s) => {
           const t = s.txns.find((x) => x.id === id);
-          /* Une vente faite depuis le stock remet les articles en rayon */
+          /* Supprimer une vente remet les articles en rayon ; supprimer un achat les retire */
+          const sign = t?.type === "expense" ? -1 : 1;
           const back = new Map<string, number>();
           t?.items?.forEach((it) => it.productId && back.set(it.productId, (back.get(it.productId) ?? 0) + it.qty));
           return {
             ...s,
             txns: s.txns.filter((x) => x.id !== id),
-            products: back.size ? s.products.map((p) => (back.has(p.id) ? { ...p, stock: p.stock + back.get(p.id)! } : p)) : s.products,
+            products: back.size
+              ? s.products.map((p) => (back.has(p.id) ? { ...p, stock: Math.max(0, p.stock + sign * back.get(p.id)!) } : p))
+              : s.products,
           };
         }),
       updateTxn: (id, patch) =>
@@ -342,8 +347,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           txns: s.txns.map((t) => (t.id === id ? { ...t, ...patch, edited: Date.now() } : t)).sort((a, b) => b.ts - a.ts),
         })),
       sellCart: (items, seller) => {
+        /* Contrôle immédiat : rien à encaisser si aucun article demandé n'est disponible */
+        const sellable = items.some((it) => it.qty > 0 && (state.products.find((p) => p.id === it.id)?.stock ?? 0) > 0);
+        if (!sellable) return null;
         const id = uid();
-        let ok = false;
         setState((s) => {
           const lines: TxnItem[] = [];
           for (const it of items) {
@@ -353,7 +360,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           }
           const valid = lines.filter((l) => l.qty > 0);
           if (!valid.length) return s;
-          ok = true;
           const txn: Txn = {
             id,
             type: "sale",
@@ -371,7 +377,33 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             txns: [txn, ...s.txns],
           };
         });
-        return ok || items.length ? id : null;
+        return id;
+      },
+      restock: (productId, qty, amount, note) => {
+        const p0 = state.products.find((p) => p.id === productId);
+        if (!p0 || qty <= 0 || amount < 0) return null;
+        const id = uid();
+        setState((s) => {
+          const p = s.products.find((x) => x.id === productId);
+          if (!p) return s;
+          const unit = amount > 0 ? Math.round(amount / qty) : p.cost;
+          const txn: Txn = {
+            id,
+            type: "expense",
+            amount,
+            category: "Marchandises",
+            note: note || `Réappro ${p.name} ×${qty}`,
+            ts: Date.now(),
+            items: [{ productId: p.id, name: p.name, qty, price: unit }],
+          };
+          return {
+            ...s,
+            /* Le prix d'achat suit le dernier réassort : la marge reste juste */
+            products: s.products.map((x) => (x.id === productId ? { ...x, stock: x.stock + qty, cost: unit } : x)),
+            txns: [txn, ...s.txns],
+          };
+        });
+        return id;
       },
       addClient: (name, phone, dir = "credit") =>
         setState((s) => {
@@ -395,7 +427,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       sellProduct: (id, qty, seller) =>
         setState((s) => {
           const p = s.products.find((x) => x.id === id);
-          if (!p || qty <= 0) return s;
+          if (!p || qty <= 0 || p.stock <= 0) return s;
+          qty = Math.min(qty, p.stock);
           const txn: Txn = {
             id: uid(),
             type: "sale",

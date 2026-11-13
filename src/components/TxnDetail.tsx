@@ -185,7 +185,12 @@ export default function TxnDetail({
           ) : (
             <div className="mt-2.5 rounded-2xl border border-rose/25 bg-rose/10 p-3">
               <p className="mb-2.5 text-center text-xs font-semibold text-rose">
-                Supprimer définitivement ?{txn.items?.length ? " Les articles retournent en stock." : ""}
+                Supprimer définitivement ?
+                {txn.items?.length
+                  ? txn.type === "expense"
+                    ? " Les quantités achetées sont retirées du stock."
+                    : " Les articles retournent en stock."
+                  : ""}
               </p>
               <div className="grid grid-cols-2 gap-2">
                 <Btn variant="soft" onClick={() => setConfirmDel(false)}>
@@ -237,7 +242,7 @@ export default function TxnDetail({
           </label>
           {txn.items?.length ? (
             <p className="mt-1.5 text-[11px] font-semibold text-muted">
-              Vente liée au stock : changer le montant ne modifie pas les quantités en stock.
+              {txn.type === "expense" ? "Achat" : "Vente"} liée au stock : changer le montant ne modifie pas les quantités en stock.
             </p>
           ) : null}
 

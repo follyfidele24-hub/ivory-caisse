@@ -23,7 +23,7 @@ import {
   PartyPopper,
 } from "lucide-react";
 import { PLANS, PAYMENTS } from "../lib/plans";
-import { Avatar, Btn } from "./ui";
+import { Avatar, BrandMark, Btn } from "./ui";
 import Legal, { type LegalDoc } from "./Legal";
 import InstallApp from "./InstallApp";
 
@@ -36,12 +36,7 @@ const fadeUp = {
 
 function Logo({ size = 38 }: { size?: number }) {
   return (
-    <div
-      className="flex items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-deep font-display font-extrabold text-white shadow-[0_8px_24px_-8px_rgba(255,122,26,0.7)]"
-      style={{ width: size, height: size, fontSize: size * 0.4 }}
-    >
-      IC
-    </div>
+    <BrandMark size={size} />
   );
 }
 
@@ -706,7 +701,7 @@ export default function Landing({ onStart }: { onStart: () => void }) {
               <Logo size={30} />
               <div>
                 <p className="font-display text-sm font-bold">Ivory Caisse</p>
-                <p className="text-xs text-muted">Un produit Ivory Gestion · Abidjan, Afrique</p>
+                <p className="text-xs text-muted">Un produit Ivory Gestion · Cocody, Abidjan</p>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-3">
@@ -741,7 +736,7 @@ export default function Landing({ onStart }: { onStart: () => void }) {
           {/* Éditeur */}
           <div className="flex flex-col gap-4 border-t border-line pt-8 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-deep font-display text-xs font-extrabold text-white">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-line bg-panel2 font-display text-xs font-extrabold text-fg">
                 IG
               </div>
               <div>
