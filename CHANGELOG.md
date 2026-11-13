@@ -1,5 +1,19 @@
 # Ivory Caisse — Journal des changements
 
+## 2.4.1
+
+### Landing revue selon les principes des galeries designeer.xyz (voir DESIGN.md)
+- Fonctions présentées comme les lignes d'un cahier de caisse, au lieu d'une grille de cartes à icônes.
+- Retirés : badge en pilule, sur-titres en capitales, bandeau défilant, halos lumineux, mot coloré dans les titres,
+  fondu répété sur chaque section. Le hero reste le seul moment animé.
+- Offre mise en avant : « Recommandé » au lieu de « Populaire » (pas encore de ventes pour le prouver).
+- Profils de commerce présentés comme des usages, sans avatars façon témoignage.
+- CTA final aligné sur le hero : « Créer ma caisse ».
+- Image de partage (og.png 1200×630) et balises Open Graph / Twitter ; méta-description réécrite.
+- E-mail de contact : ivorygestion@gmail.com ; page support statique complétée (WhatsApp, téléphones, siège) ;
+  nouveau logo sur les pages statiques.
+- DESIGN.md : direction, palette avec rôles, règles et grille de revue pour les prochaines évolutions.
+
 ## 2.4.0
 
 ### Stock fiable

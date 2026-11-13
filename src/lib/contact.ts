@@ -3,7 +3,7 @@ export const CONTACT = {
   structure: "Ivory Gestion",
   product: "Ivory Caisse",
   founder: "Fidèle Folly",
-  email: "contact@ivorygestion.com",
+  email: "ivorygestion@gmail.com",
   whatsapp: "+225 07 59 26 09 53",
   whatsappNum: "2250759260953",
   phones: [

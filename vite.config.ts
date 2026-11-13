@@ -32,6 +32,7 @@ function precacheManifest(): Plugin {
         (f) =>
           f !== "sw.js" &&
           f !== "_headers" &&
+          f !== "og.png" &&
           f !== "_redirects" &&
           // Firebase : sauvegarde cloud = réseau obligatoire, inutile de le pré-télécharger
           !/\/firebase-/.test(f) &&

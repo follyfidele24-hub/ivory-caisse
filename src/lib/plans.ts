@@ -40,7 +40,7 @@ export const PLANS: PlanDef[] = [
     price: "2 000 F",
     amount: 2000,
     per: "/ mois",
-    tag: "Populaire",
+    tag: "Recommandé",
     highlight: true,
     features: PREMIUM_FEATURES,
     chariowUrl: "https://nunovjiz.mychariow.shop/prd_ewwwyub0",
