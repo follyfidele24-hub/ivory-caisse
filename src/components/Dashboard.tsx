@@ -199,10 +199,10 @@ export default function Dashboard({
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-[1.8rem] bg-gradient-to-br from-brand via-brand to-deep p-6 shadow-[0_20px_50px_-20px_rgba(255,122,26,0.55)]"
+        className="relative overflow-hidden rounded-[1.8rem] bg-gradient-to-br from-action via-action to-action2 p-6 shadow-[0_20px_50px_-20px_rgba(255,122,26,0.55)]"
       >
         <div className="pointer-events-none absolute -right-10 -top-16 h-44 w-44 rounded-full bg-white/15 blur-2xl" />
-        <p className="text-xs font-bold uppercase tracking-[0.14em] text-white/75">Profit du jour</p>
+        <p className="text-xs font-bold uppercase tracking-[0.14em] text-white/85">Profit du jour</p>
         <p className="mt-1 font-display text-[2.9rem] font-extrabold leading-none tracking-tight text-white">
           <AnimNum value={t.profit} format={fmtF} />
         </p>

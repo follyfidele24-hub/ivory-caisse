@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import {
   ArrowRight,
   ArrowUpRight,
+  FileText,
   BarChart3,
   Bell,
   Check,
@@ -188,7 +189,17 @@ const BENTO = [
   {
     icon: MessageCircle,
     title: "Relance WhatsApp",
-    desc: "Un tap : le message de rappel part au client avec le montant exact.",
+    desc: "Chaque jour, la liste des clients qui tardent à payer. Un geste : le rappel part sur WhatsApp avec le montant exact.",
+  },
+  {
+    icon: TrendingUp,
+    title: "Marge par article",
+    desc: "Ce que chaque article te rapporte vraiment, prix d'achat déduit. Ton top 5 du mois en un coup d'œil.",
+  },
+  {
+    icon: FileText,
+    title: "Dossier pour un prêt",
+    desc: "12 mois de chiffres dans un PDF propre, à montrer à ta microfinance, ta banque ou ta tontine.",
   },
   {
     icon: Target,
@@ -198,7 +209,7 @@ const BENTO = [
   {
     icon: Receipt,
     title: "Reçus de caisse",
-    desc: "Reçu PDF ou message WhatsApp après chaque vente. Une preuve propre pour chaque client.",
+    desc: "Reçu PDF, image ou message WhatsApp après chaque vente, avec ton nom, ta ville et ton numéro.",
   },
   {
     icon: KeyRound,
@@ -248,6 +259,14 @@ const TESTIMONIALS = [
   },
 ];
 
+/* Libellé qui dit ce que fait le bouton, offre par offre */
+const CTA_LABEL: Record<string, string> = {
+  free: "Commencer gratuitement",
+  pro: "Passer Premium",
+  year: "Prendre l'Annuel",
+  life: "Payer une seule fois",
+};
+
 const FAQ = [
   {
     q: "Ça marche vraiment sans internet ?",
@@ -264,8 +283,16 @@ const FAQ = [
     a: "Depuis l'application : tu choisis ta formule, tu paies sur la page sécurisée de la boutique Ivory Gestion, puis tu colles la clé reçue par e-mail. À partir de 2 000 F par mois, ou 25 000 F une seule fois pour la version à vie.",
   },
   {
+    q: "Que se passe-t-il à la fin de ma licence ?",
+    a: "Rien n'est effacé. L'app repasse simplement en gratuit : tes ventes, crédits et stock restent sur ton téléphone. Tu reprends le Premium quand tu veux avec une nouvelle clé, et tout se débloque à nouveau.",
+  },
+  {
+    q: "J'ai payé mais ma clé ne marche pas. Je fais quoi ?",
+    a: "Vérifie que tu as copié toute la clé reçue par e-mail, sans espace en trop. Une clé marche sur 2 téléphones au maximum. Si le message d'erreur persiste, écris-nous sur WhatsApp au +225 07 59 26 09 53 avec la capture de l'écran : on règle ça avec toi.",
+  },
+  {
     q: "Je peux l'utiliser avec mes vendeuses ?",
-    a: "Oui. Tu ajoutes chaque membre dans « Mon équipe », et au moment d'encaisser tu indiques qui a pris la vente. Les rapports montrent ensuite les encaissements de chacune.",
+    a: "Oui. Tu ajoutes chaque membre dans « Mon équipe », et au moment d'encaisser tu indiques qui a pris la vente. Les rapports montrent ensuite les encaissements de chacune. Le gratuit permet 1 vendeuse, le Premium une équipe illimitée.",
   },
   {
     q: "C'est disponible sur Google Play ?",
@@ -431,6 +458,33 @@ export default function Landing({ onStart }: { onStart: () => void }) {
         </ul>
       </section>
 
+      {/* Vraies captures de l'app (données d'exemple) : la preuve produit */}
+      <section className="mx-auto max-w-6xl px-5 pb-8">
+        <h2 className="max-w-xl font-display text-3xl font-extrabold tracking-tight sm:text-4xl">L'app, telle que tu l'auras</h2>
+        <p className="mt-2 max-w-xl text-base leading-relaxed text-muted">
+          Captures réelles d'Ivory Caisse, avec les données d'exemple fournies à l'inscription.
+        </p>
+        <div className="mt-8 grid grid-cols-2 gap-4 sm:max-w-2xl sm:gap-8">
+          {[
+            ["./screens/caisse.webp", "Écran Caisse : profit du jour, ventes, dépenses, objectif et crédits à récupérer", "La caisse du jour"],
+            ["./screens/rapports.webp", "Écran Rapports : ventes, dépenses et profit de la semaine avec la courbe d'évolution", "Les rapports"],
+          ].map(([src, alt, cap]) => (
+            <figure key={src}>
+              <img
+                src={src}
+                alt={alt}
+                width={540}
+                height={1169}
+                loading="lazy"
+                decoding="async"
+                className="w-full rounded-[1.6rem] border border-line shadow-[0_24px_60px_-30px_rgba(22,35,92,0.45)]"
+              />
+              <figcaption className="mt-3 text-sm font-bold">{cap}</figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+
       {/* Comment ça marche */}
       <section className="border-y border-line bg-panel px-5 py-24">
         <div className="mx-auto max-w-6xl">
@@ -455,7 +509,7 @@ export default function Landing({ onStart }: { onStart: () => void }) {
       <section className="mx-auto max-w-6xl px-5 py-24">
         <motion.div className="mb-14 max-w-2xl">
           <h2 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl">
-            Gratuit pour commencer. {"2\u00A0000\u00A0F"} par mois pour tout avoir.
+            Gratuit pour commencer. Premium dès {"2\u00A0000\u00A0F"} par mois.
           </h2>
           <div className="mt-6 flex flex-wrap items-center gap-2">
             {PAYMENTS.map((p) => (
@@ -511,7 +565,7 @@ export default function Landing({ onStart }: { onStart: () => void }) {
                     : "border border-line bg-panel2"
                 }`}
               >
-                Choisir <ArrowUpRight size={15} />
+                {CTA_LABEL[p.id] ?? "Choisir"}
               </button>
             </motion.div>
           ))}

@@ -107,7 +107,7 @@ export default function DayClose({ onClose }: { onClose: () => void }) {
           initial={{ opacity: 0, scale: 0.92 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.12 }}
-          className="mt-6 rounded-[1.8rem] bg-gradient-to-br from-brand via-brand to-deep p-6 text-center shadow-[0_20px_50px_-20px_rgba(255,122,26,0.55)]"
+          className="mt-6 rounded-[1.8rem] bg-gradient-to-br from-action via-action to-action2 p-6 text-center shadow-[0_20px_50px_-20px_rgba(255,122,26,0.55)]"
         >
           <p className="text-xs font-bold uppercase tracking-[0.14em] text-white/75">Profit du jour</p>
           <p className="mt-1 font-display text-[2.8rem] font-extrabold leading-none tabular-nums text-white">

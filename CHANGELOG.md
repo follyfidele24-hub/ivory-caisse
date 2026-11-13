@@ -1,5 +1,13 @@
 # Ivory Caisse — Journal des changements
 
+## 2.6.1 — suite de l'audit
+
+- Landing : vraies captures de l'app (Caisse, Rapports) ; titre des prix corrigé (« Premium dès 2 000 F par mois ») ;
+  boutons des offres explicites (Commencer gratuitement, Passer Premium, Prendre l'Annuel, Payer une seule fois) ;
+  nouvelles fonctions dans la liste (relances, marge par article, dossier pour un prêt, reçu à ton nom) ;
+  FAQ : fin de licence, clé qui ne marche pas, limite d'équipe.
+- Carte « Profit du jour » et bilan du soir : orange foncé lisible (texte blanc).
+
 ## 2.6.0 — des offres qui rapportent
 
 ### Premium (mensuel)
