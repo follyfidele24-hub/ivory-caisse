@@ -10,8 +10,8 @@
     "standalone"
   ],
   "orientation": "portrait",
-  "background_color": "#0A0A0E",
-  "theme_color": "#0A0A0E",
+  "background_color": "#F6F7FA",
+  "theme_color": "#F6F7FA",
   "lang": "fr",
   "id": "ivory-caisse",
   "categories": [

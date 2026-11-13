@@ -25,17 +25,18 @@ html {
   color-scheme: dark;
 }
 
-/* ---------- Mode clair (plein soleil) ----------
-   Contrastes texte ≥ 4,5:1 sur fond clair : vert, rouge, ambre et bleu foncés. */
+/* ---------- Mode clair (mode par défaut, lisible en plein soleil) ----------
+   Fond « papier de cahier » légèrement bleuté, texte encre bleu nuit (comme le logo).
+   Contrastes texte ≥ 4,5:1 : vert, rouge, ambre et bleu foncés. */
 :root[data-mode="light"] {
   color-scheme: light;
-  --color-ink: #f5f3ee;
+  --color-ink: #f6f7fa;
   --color-panel: #ffffff;
-  --color-panel2: #f0ede6;
-  --color-line: rgba(20, 20, 28, 0.1);
-  --color-cream: #17171d;
-  --color-muted: #5d5d69;
-  --color-fg: #14141a;
+  --color-panel2: #eef1f6;
+  --color-line: rgba(22, 35, 92, 0.11);
+  --color-cream: #141a33;
+  --color-muted: #59607a;
+  --color-fg: #141a33;
   --color-mint: #0b7a54;
   --color-on-mint: #ffffff;
   --color-rose: #c8173f;
@@ -49,7 +50,7 @@ html {
   opacity: 0.025;
 }
 :root[data-mode="light"] ::selection {
-  color: #17171d;
+  color: #141a33;
 }
 
 body {

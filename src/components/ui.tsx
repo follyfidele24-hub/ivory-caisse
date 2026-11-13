@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion, useSpring } from "framer-motion";
 import { Delete as DeleteIcon, X } from "lucide-react";
 
@@ -323,40 +323,16 @@ export function Toast({
   );
 }
 
-/* ---------- Marque Ivory Caisse : auvent de boutique + pièce en francs ----------
-   Même dessin que l'icône de l'app, mais aux couleurs du thème choisi. */
+/* ---------- Marque Ivory Caisse : le « i » d'Ivory, dont le point est une pièce ----------
+   À droite, les lignes du cahier de caisse. Fond encre bleu nuit fixe ; la pièce prend la
+   couleur du thème choisi. Même dessin que public/icons/icon.svg. */
 export function BrandMark({ size = 40, className = "" }: { size?: number; className?: string }) {
-  const id = useId().replace(/:/g, "");
   return (
-    <svg
-      viewBox="0 0 64 64"
-      width={size}
-      height={size}
-      className={`shrink-0 drop-shadow-[0_8px_18px_color-mix(in_oklab,var(--color-brand)_45%,transparent)] ${className}`}
-      aria-hidden="true"
-    >
-      <defs>
-        <linearGradient id={`bg${id}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="color-mix(in oklab, var(--color-brand) 60%, white)" />
-          <stop offset=".45" stopColor="var(--color-brand)" />
-          <stop offset="1" stopColor="var(--color-deep)" />
-        </linearGradient>
-        <clipPath id={`aw${id}`}>
-          <path d="M13 13.5h38l3 9H10z" />
-        </clipPath>
-      </defs>
-      <rect width="64" height="64" rx="15" fill={`url(#bg${id})`} />
-      <g clipPath={`url(#aw${id})`}>
-        <rect x="9" y="13" width="46" height="10" fill="#fff" />
-        <path d="M20.6 13h7.6v10h-8.6zM35.8 13h7.6l1.6 10h-8.6z" fill="#fff" opacity=".7" />
-      </g>
-      <path
-        d="M10 22.5h44v1.2a3.67 3.67 0 0 1-7.33 0 3.67 3.67 0 0 1-7.34 0 3.67 3.67 0 0 1-7.33 0 3.67 3.67 0 0 1-7.33 0 3.67 3.67 0 0 1-7.34 0 3.67 3.67 0 0 1-7.33 0z"
-        fill="#fff"
-      />
-      <circle cx="32" cy="42.5" r="12" fill="#fff" />
-      <circle cx="32" cy="42.5" r="8.4" fill="none" stroke="var(--color-brand)" strokeWidth="2.4" />
-      <path d="M29 38h6.2M29 38v9M29 42.3h4.8" stroke="var(--color-deep)" strokeWidth="2.4" strokeLinecap="round" fill="none" />
+    <svg viewBox="0 0 64 64" width={size} height={size} className={`shrink-0 ${className}`} aria-hidden="true">
+      <rect width="64" height="64" rx="14" fill="#16235c" />
+      <rect x="14" y="27" width="11" height="25" rx="5.5" fill="#fdfdf9" />
+      <circle cx="19.5" cy="15.5" r="7.5" fill="var(--color-brand)" />
+      <path d="M33 22h17M33 31h17M33 40h17M33 49h11" stroke="#7ea6dc" strokeWidth="3" strokeLinecap="round" />
     </svg>
   );
 }

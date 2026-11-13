@@ -22,4 +22,3 @@ ios/App/build/
 Thumbs.db
 # Local Netlify folder
 .netlify
-tsconfig.tsbuildinfo

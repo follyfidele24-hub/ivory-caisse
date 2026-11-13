@@ -101,9 +101,9 @@ function PhoneMock() {
   const bars = [38, 55, 42, 70, 58, 92, 66];
   return (
     <div className="relative mx-auto w-[268px]">
-      <div className="float-slow relative rounded-[2.4rem] border border-white/10 bg-[#0d0d12] p-2 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.9)]">
+      <div className="float-slow relative rounded-[2.4rem] border border-white/10 bg-[#0d0d12] p-2 shadow-[0_40px_80px_-30px_rgba(22,35,92,0.45)]">
         <div className="rounded-[2rem] border border-line bg-ink p-4">
-          <div className="mx-auto mb-4 h-1.5 w-14 rounded-full bg-white/10" />
+          <div className="mx-auto mb-4 h-1.5 w-14 rounded-full bg-fg/10" />
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-deep font-display text-[10px] font-bold text-white">
@@ -131,7 +131,7 @@ function PhoneMock() {
               <span className="text-[8px] font-semibold text-muted">OBJECTIF 50 000 F</span>
               <span className="text-[8px] font-bold text-brand2">72%</span>
             </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+            <div className="h-1.5 overflow-hidden rounded-full bg-fg/10">
               <div className="h-full w-[72%] rounded-full bg-gradient-to-r from-brand to-brand2" />
             </div>
           </div>
@@ -142,7 +142,7 @@ function PhoneMock() {
                 <div
                   key={i}
                   style={{ height: `${h}%` }}
-                  className={`flex-1 rounded-full ${i === 5 ? "bg-gradient-to-t from-deep to-brand2" : "bg-white/12"}`}
+                  className={`flex-1 rounded-full ${i === 5 ? "bg-gradient-to-t from-deep to-brand2" : "bg-fg/12"}`}
                 />
               ))}
             </div>
@@ -439,7 +439,7 @@ export default function Landing({ onStart }: { onStart: () => void }) {
           <div className="grid gap-8 md:grid-cols-3">
             {STEPS.map((s) => (
               <motion.div key={s.n} className="relative">
-                <span className="font-display text-[4.5rem] font-extrabold leading-none text-white/[0.07]">{s.n}</span>
+                <span className="font-display text-[4.5rem] font-extrabold leading-none text-fg/[0.08]">{s.n}</span>
                 <h3 className="-mt-6 font-display text-xl font-bold tracking-tight">{s.title}</h3>
                 <p className="mt-3 text-sm leading-relaxed text-muted">{s.desc}</p>
               </motion.div>

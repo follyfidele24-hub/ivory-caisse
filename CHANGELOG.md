@@ -1,5 +1,13 @@
 # Ivory Caisse — Journal des changements
 
+## 2.5.0
+
+- Mode clair par défaut partout (app, page d'accueil, pages statiques, barre du navigateur, écran de lancement).
+  Le sombre reste disponible dans Réglages ; ceux qui l'avaient choisi le gardent.
+- Nouveau fond « papier de cahier » #f6f7fa et texte encre bleu nuit #141a33 (fini le crème).
+- Nouveau logo « le cahier » : le « i » d'Ivory dont le point est une pièce, avec les lignes du cahier.
+  Icônes de l'app, favicon et image de partage refaits.
+
 ## 2.4.1
 
 ### Landing revue selon les principes des galeries designeer.xyz (voir DESIGN.md)

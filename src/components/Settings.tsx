@@ -111,7 +111,7 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
   };
 
   const since = daysSinceBackup(profile);
-  const mode: ThemeMode = profile?.mode ?? "dark";
+  const mode: ThemeMode = profile?.mode ?? "light";
 
   const shareApp = async () => {
     const payload = {
@@ -615,7 +615,7 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
           <BrandMark size={40} />
           <div className="flex-1">
             <p className="text-sm font-bold">Ivory Caisse</p>
-            <p className="text-xs text-muted">Version 2.4.1 · Membre depuis le {profile ? longDate(profile.created) : "—"}</p>
+            <p className="text-xs text-muted">Version 2.5.0 · Membre depuis le {profile ? longDate(profile.created) : "—"}</p>
           </div>
         </div>
         {/* Éditeur */}

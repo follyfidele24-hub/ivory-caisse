@@ -18,14 +18,18 @@ de fonctions, les extraits de journée, l'image de partage. Pas de grille de car
 
 ## Couleurs (rôles fixes)
 
-| Rôle | Valeur sombre | Valeur claire | Origine |
+**Mode clair par défaut** (app, landing, pages statiques). Le mode sombre reste un choix dans Réglages.
+
+| Rôle | Mode clair (défaut) | Mode sombre | Origine |
 |---|---|---|---|
-| Fond, encre de nuit | `--color-ink` #0a0a0e | #f5f3ee | écran utilisé tôt le matin et tard le soir |
-| Texte, ivoire | `--color-cream` #f7f3ec | #17171d | le nom « Ivory » |
-| Action, orange | `--color-brand` #ff7a1a (thème) | idem, foncé pour le texte | drapeau ivoirien, mobile money |
-| Argent qui rentre | `--color-mint` #22c98d | #0b7a54 | vert du drapeau, ventes |
-| Argent qui sort | `--color-rose` #f5516c | #c8173f | dépenses, ruptures |
-| Texte secondaire | `--color-muted` | | |
+| Fond, papier de cahier | `--color-ink` #f6f7fa | #0a0a0e | papier légèrement bleuté, pas de crème |
+| Surfaces | `--color-panel` #ffffff, `--color-panel2` #eef1f6 | #121218 / #1a1a23 | |
+| Texte, encre bleu nuit | `--color-cream` / `--color-fg` #141a33 | #f7f3ec / #ffffff | l'encre du logo |
+| Texte secondaire | `--color-muted` #59607a | #92929f | |
+| Action, orange | `--color-brand` #ff7a1a (thème) | idem | drapeau ivoirien, mobile money, la pièce du logo |
+| Argent qui rentre | `--color-mint` #0b7a54 | #22c98d | vert du drapeau |
+| Argent qui sort | `--color-rose` #c8173f | #f5516c | dépenses, ruptures |
+| Logo | encre #16235c, lignes Seyès #7ea6dc | idem | |
 
 Règles : orange réservé à l'action principale et à la marque. Vert et rose réservés aux montants.
 Pas d'autre couleur d'accent (pas de bleu ciel, violet, ambre décoratifs).
@@ -39,10 +43,12 @@ Pas d'autre couleur d'accent (pas de bleu ciel, violet, ambre décoratifs).
 
 ## Marque
 
-- Logo : auvent de boutique + pièce marquée F (`BrandMark` dans `ui.tsx`, `public/icons/icon.svg`).
-  Suit la couleur du thème dans l'app ; orange fixe sur les icônes et l'image de partage.
+- Logo « le cahier » : un « i » d'Ivory dont le point est une pièce, à côté des lignes du cahier de caisse.
+  Carré encre bleu nuit #16235c, jambage blanc papier, lignes bleu Seyès #7ea6dc, pièce orange.
+  Composant `BrandMark` (`ui.tsx`) : la pièce prend la couleur du thème. Fichiers : `public/icons/icon.svg`
+  et PNG dérivés (192, 512, maskable, apple-touch).
 - Ivory Gestion (éditeur) : pastille « IG » neutre (fond `panel2`, bordure `line`), jamais orange.
-- Image de partage : `public/og.png` (1200×630), titre + extrait de cahier.
+- Image de partage : `public/og.png` (1200×630), fond clair, titre + extrait de cahier.
 
 ## Mouvement
 

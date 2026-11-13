@@ -231,8 +231,8 @@ function Root() {
     setCurrency(profile?.currency);
   }, [profile?.currency]);
 
-  /* Le mode clair ne concerne que l'app (la page d'accueil reste sombre) */
-  const mode = profile ? profile.mode : "dark";
+  /* Mode clair par défaut, y compris sur la page d'accueil ; le sombre reste au choix dans Réglages */
+  const mode = profile?.mode ?? "light";
   useEffect(() => {
     applyTheme(profile?.theme, mode);
     if (mode !== "auto") return;

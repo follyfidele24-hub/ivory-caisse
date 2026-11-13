@@ -40,5 +40,5 @@ export function applyTheme(id?: string, mode?: Mode): void {
   r.style.setProperty("--color-brand2", m === "light" ? `color-mix(in oklab, ${t.deep} 72%, black)` : t.brand2);
   r.style.setProperty("--color-deep", t.deep);
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute("content", m === "light" ? "#f5f3ee" : "#0A0A0E");
+  if (meta) meta.setAttribute("content", m === "light" ? "#f6f7fa" : "#0A0A0E");
 }
