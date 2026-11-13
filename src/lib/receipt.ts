@@ -1,5 +1,6 @@
 import { fmtF, fullDate, timeOf } from "./format";
 import type { Product, Profile, Txn } from "./store";
+import { receiptIdentity } from "./receiptIdentity";
 
 const clean = (s: string): string => s.replace(/[\u202F\u00A0]/g, " ");
 const m = (n: number): string => clean(fmtF(n));
@@ -16,15 +17,17 @@ export async function exportReceiptPDF(txn: Txn, profile: Profile | null) {
   /* En-tête */
   doc.setFont("helvetica", "bold");
   doc.setFontSize(13);
-  doc.text(clean(profile?.shop ?? "MA BOUTIQUE"), w / 2, y, { align: "center" });
+  const id = receiptIdentity(profile);
+  doc.text(clean(id.shop), w / 2, y, { align: "center" });
   y += 14;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   doc.setTextColor(110, 110, 118);
-  doc.text(clean(profile?.name ?? ""), w / 2, y, { align: "center" });
-  y += 11;
-  doc.text("Abidjan - Cote d'Ivoire", w / 2, y, { align: "center" });
-  y += 13;
+  for (const l of id.lines) {
+    doc.text(clean(l), w / 2, y, { align: "center" });
+    y += 11;
+  }
+  y += 2;
 
   /* Séparateur */
   doc.setDrawColor(200, 198, 192);
@@ -98,11 +101,11 @@ export async function exportReceiptPDF(txn: Txn, profile: Profile | null) {
   y += 14;
   doc.setFontSize(7.5);
   doc.setTextColor(90, 90, 98);
-  doc.text("Merci de votre visite !", w / 2, y, { align: "center" });
+  doc.text(clean(id.thanks), w / 2, y, { align: "center" });
   y += 12;
   doc.setFontSize(6);
   doc.setTextColor(150, 150, 158);
-  doc.text(clean("Ivory Caisse · édité par Ivory Gestion"), w / 2, y, { align: "center" });
+  if (id.footer) doc.text(clean("Ivory Caisse · édité par Ivory Gestion"), w / 2, y, { align: "center" });
 
   doc.save(`recu-${txn.id}-${new Date(txn.ts).toISOString().slice(0, 10)}.pdf`);
 }
@@ -110,8 +113,10 @@ export async function exportReceiptPDF(txn: Txn, profile: Profile | null) {
 /* ---------------- Reçu texte pour WhatsApp ---------------- */
 
 export function receiptText(txn: Txn, profile: Profile | null): string {
+  const id = receiptIdentity(profile);
   const lines = [
-    `*${profile?.shop ?? "MA BOUTIQUE"}*`,
+    `*${id.shop}*`,
+    ...(profile?.plan !== "free" && profile?.receipt && (profile.receipt.city || profile.receipt.phone) ? [id.lines.join(" · ")] : []),
     clean(fullDate(txn.ts)) + " · " + clean(timeOf(txn.ts)),
     "",
     ...(txn.items?.length
@@ -120,7 +125,7 @@ export function receiptText(txn: Txn, profile: Profile | null): string {
     `*TOTAL : ${m(txn.amount)}*`,
   ];
   if (txn.seller) lines.push(`Encaisse par ${txn.seller}`);
-  lines.push("", "_Merci de votre visite !_", "N° " + txn.id.toUpperCase());
+  lines.push("", `_${id.thanks}_`, "N° " + txn.id.toUpperCase());
   return lines.join("\n");
 }
 

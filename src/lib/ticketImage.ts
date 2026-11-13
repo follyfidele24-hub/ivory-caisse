@@ -1,4 +1,5 @@
 import { fmtF, fullDate, timeOf } from "./format";
+import { receiptIdentity } from "./receiptIdentity";
 import type { Profile, Txn } from "./store";
 
 /**
@@ -61,10 +62,14 @@ function draw(ctx: CanvasRenderingContext2D | null, txn: Txn, profile: Profile |
     ctx.fillRect(0, 0, W, 14);
   }
   y = 96;
-  text(profile?.shop ?? "Ma boutique", W / 2, y, `800 44px ${FONT_DISPLAY}`, INK, "center");
+  const id = receiptIdentity(profile);
+  text(id.shop, W / 2, y, `800 44px ${FONT_DISPLAY}`, INK, "center");
   y += 40;
-  text(profile?.name ?? "", W / 2, y, `500 24px ${FONT_BODY}`, MUTED, "center");
-  y += 40;
+  for (const l of id.lines) {
+    text(l, W / 2, y, `500 24px ${FONT_BODY}`, MUTED, "center");
+    y += 32;
+  }
+  y += 8;
   if (ctx) dashed(ctx, y);
   y += 46;
 
@@ -106,9 +111,9 @@ function draw(ctx: CanvasRenderingContext2D | null, txn: Txn, profile: Profile |
   y += 50;
   if (ctx) dashed(ctx, y);
   y += 56;
-  text("Merci de votre visite !", W / 2, y, `600 26px ${FONT_BODY}`, INK, "center");
+  text(id.thanks, W / 2, y, `600 26px ${FONT_BODY}`, INK, "center");
   y += 38;
-  text("Ivory Caisse · Ivory Gestion", W / 2, y, `500 20px ${FONT_BODY}`, "#a3a3ad", "center");
+  if (id.footer) text(id.footer, W / 2, y, `500 20px ${FONT_BODY}`, "#6b6b75", "center");
   y += 56;
   return y;
 }

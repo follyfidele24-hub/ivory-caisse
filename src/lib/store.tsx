@@ -23,6 +23,8 @@ export interface TxnItem {
   name: string;
   qty: number;
   price: number;
+  /** Prix d'achat unitaire au moment de la vente (pour la marge exacte) */
+  cost?: number;
 }
 
 export type ThemeMode = "dark" | "light" | "auto";
@@ -45,6 +47,8 @@ export interface Debt {
   entries: DebtMove[];
   payments: DebtMove[];
   created: number;
+  /** Dernière relance envoyée (WhatsApp) */
+  remindedAt?: number;
 }
 
 export interface Product {
@@ -88,6 +92,8 @@ export interface Profile {
   lastPaymentTx?: string;
   /** true tant que les données d'exemple de l'inscription sont présentes */
   demo?: boolean;
+  /** Reçu personnalisé (Premium) */
+  receipt?: { city?: string; phone?: string; thanks?: string };
 }
 
 export const PLAN_LABEL: Record<Plan, string> = {
@@ -99,6 +105,25 @@ export const PLAN_LABEL: Record<Plan, string> = {
 
 export const debtBalance = (d: Debt): number =>
   d.entries.reduce((s, e) => s + e.amount, 0) - d.payments.reduce((s, p) => s + p.amount, 0);
+
+/* ---------- Relances ----------
+   Un client « à relancer » : il doit encore de l'argent, rien n'a bougé sur sa fiche depuis
+   RELANCE_DAYS jours, et on ne l'a pas déjà relancé ces REMIND_PAUSE derniers jours. */
+export const RELANCE_DAYS = 7;
+const REMIND_PAUSE = 3;
+export const lastMoveTs = (d: Debt): number =>
+  Math.max(d.created, ...d.entries.map((e) => e.ts), ...d.payments.map((p) => p.ts));
+export function toRemind(debts: Debt[], now = Date.now()): Debt[] {
+  return debts
+    .filter(
+      (d) =>
+        (d.dir ?? "credit") === "credit" &&
+        debtBalance(d) > 0 &&
+        now - lastMoveTs(d) >= RELANCE_DAYS * DAY &&
+        (!d.remindedAt || now - d.remindedAt >= REMIND_PAUSE * DAY),
+    )
+    .sort((a, b) => debtBalance(b) - debtBalance(a));
+}
 
 export function totals(txns: Txn[], from: number, to: number) {
   let sales = 0;
@@ -130,6 +155,7 @@ interface StoreShape {
   addClient: (name: string, phone: string, dir?: DebtDir) => void;
   addDebtMove: (debtId: string, kind: "entry" | "payment", amount: number, note: string) => void;
   removeClient: (id: string) => void;
+  markReminded: (id: string) => void;
   addProduct: (p: Omit<Product, "id" | "ts">) => void;
   updateProduct: (id: string, patch: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
@@ -356,7 +382,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           for (const it of items) {
             const p = s.products.find((x) => x.id === it.id);
             if (!p || it.qty <= 0) continue;
-            lines.push({ productId: p.id, name: p.name, qty: Math.min(it.qty, p.stock), price: p.price });
+            lines.push({ productId: p.id, name: p.name, qty: Math.min(it.qty, p.stock), price: p.price, cost: p.cost });
           }
           const valid = lines.filter((l) => l.qty > 0);
           if (!valid.length) return s;
@@ -420,6 +446,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           }),
         })),
       removeClient: (id) => setState((s) => ({ ...s, debts: s.debts.filter((d) => d.id !== id) })),
+      markReminded: (id) =>
+        setState((s) => ({ ...s, debts: s.debts.map((d) => (d.id === id ? { ...d, remindedAt: Date.now() } : d)) })),
       addProduct: (p) => setState((s) => ({ ...s, products: [{ ...p, id: uid(), ts: Date.now() }, ...s.products] })),
       updateProduct: (id, patch) =>
         setState((s) => ({ ...s, products: s.products.map((p) => (p.id === id ? { ...p, ...patch } : p)) })),
@@ -437,7 +465,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             note: `${p.name} ×${qty}`,
             ts: Date.now(),
             seller,
-            items: [{ productId: p.id, name: p.name, qty, price: p.price }],
+            items: [{ productId: p.id, name: p.name, qty, price: p.price, cost: p.cost }],
           };
           return {
             ...s,

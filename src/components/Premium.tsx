@@ -376,7 +376,7 @@ export default function Premium({ onClose, initialStep = "plans" }: { onClose: (
                   Bienvenue dans <span className="text-brand2">Premium !</span>
                 </h1>
                 <p className="mx-auto mt-3 max-w-xs text-sm leading-relaxed text-muted">
-                  Clients crédit illimités, historique complet, rapports du mois, export PDF et Excel : tout est débloqué. Au travail !
+                  Relances, marges par article, reçu à ton nom, équipe illimitée, historique complet, exports : tout est débloqué. Au travail !
                 </p>
               </motion.div>
               <motion.div

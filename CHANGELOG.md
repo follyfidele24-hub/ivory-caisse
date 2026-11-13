@@ -1,5 +1,22 @@
 # Ivory Caisse — Journal des changements
 
+## 2.6.0 — des offres qui rapportent
+
+### Premium (mensuel)
+- **À relancer aujourd'hui** (Crédits) : les clients qui doivent encore et dont la fiche dort depuis 7 jours,
+  triés par montant, relance WhatsApp pré-remplie en un geste ; un client relancé sort de la liste 3 jours.
+  En gratuit : aperçu du montant qui dort, noms cachés.
+- **Ce qui rapporte vraiment** (Rapports) : marge par article sur la période et top 5. Le prix d'achat est
+  désormais enregistré au moment de la vente pour une marge exacte.
+- **Reçu à ton nom** (Réglages → Mon reçu) : ville, téléphone, message de remerciement, sans la mention
+  Ivory Caisse, sur les reçus PDF, image et WhatsApp. Le reçu gratuit n'affiche plus « Abidjan » par défaut.
+- **Équipe illimitée** ; le gratuit passe à 1 vendeuse (les équipes existantes sont conservées).
+
+### Annuel et À vie
+- **Dossier pour un prêt** : PDF 12 mois (synthèse, ventes par mois, détail mensuel, crédits clients,
+  dettes, valeur du stock) avec mention « chiffres non audités ».
+- Annuel : prise en main de 30 min par WhatsApp (service assuré par Ivory Gestion).
+
 ## 2.5.1 — corrections du check-up
 
 ### Promesses tenues

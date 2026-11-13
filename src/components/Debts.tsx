@@ -13,13 +13,90 @@ import {
   ShoppingBag,
   Trash2,
 } from "lucide-react";
-import { fmt, fmtF, relDay, sym, timeOf } from "../lib/format";
-import { debtBalance, useStore, type Debt, type DebtDir } from "../lib/store";
+import { DAY, fmt, fmtF, relDay, sym, timeOf } from "../lib/format";
+import { debtBalance, lastMoveTs, toRemind, useStore, type Debt, type DebtDir } from "../lib/store";
 import { AmountPad } from "./AddTxn";
 import { Avatar, Btn, Seg, Sheet, Toast } from "./ui";
 
+/* ---------- Relance WhatsApp ---------- */
+
+const reminderText = (d: Debt, shop: string) =>
+  `Bonjour ${d.name}, c'est ${shop}. Il te reste ${fmtF(debtBalance(d))} à régler. Tu peux passer quand tu veux. Merci !`;
+
+const waUrl = (d: Debt, shop: string) =>
+  `https://wa.me/225${d.phone.replace(/\s/g, "")}?text=${encodeURIComponent(reminderText(d, shop))}`;
+
+/* Liste « à relancer aujourd'hui » : clients qui doivent encore et dont la fiche dort depuis 7 jours.
+   Gratuit : on montre combien d'argent dort (aperçu) · Premium : la liste et la relance en un geste. */
+function RelanceCard({
+  debts,
+  shop,
+  isFree,
+  onPremium,
+  onRemind,
+  onOpen,
+}: {
+  debts: Debt[];
+  shop: string;
+  isFree: boolean;
+  onPremium: () => void;
+  onRemind: (d: Debt) => void;
+  onOpen: (id: string) => void;
+}) {
+  const list = toRemind(debts);
+  if (list.length === 0) return null;
+  const total = list.reduce((s, d) => s + debtBalance(d), 0);
+  const days = (d: Debt) => Math.floor((Date.now() - lastMoveTs(d)) / DAY);
+  return (
+    <section aria-label="Clients à relancer" className="card mt-4 border-rose/30 p-4">
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 className="font-display text-base font-extrabold">À relancer aujourd'hui</h2>
+        <span className="font-display text-sm font-extrabold text-rose tabular-nums">{fmtF(total)}</span>
+      </div>
+      <p className="mt-0.5 text-xs text-muted">
+        {list.length} client{list.length > 1 ? "s" : ""} sans paiement depuis 7 jours ou plus.
+      </p>
+      {isFree ? (
+        <button
+          onClick={onPremium}
+          className="tap btn-press mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-brand/30 bg-brand/10 text-sm font-bold text-brand2"
+        >
+          <Lock size={14} aria-hidden="true" /> Voir qui relancer · Premium
+        </button>
+      ) : (
+        <ul className="mt-2 divide-y divide-line">
+          {list.slice(0, 6).map((d) => (
+            <li key={d.id} className="flex items-center gap-3 py-2.5">
+              <button onClick={() => onOpen(d.id)} className="tap min-w-0 flex-1 text-left">
+                <p className="truncate text-sm font-bold">{d.name}</p>
+                <p className="text-xs text-muted tabular-nums">
+                  {fmtF(debtBalance(d))} · rien depuis {days(d)} j
+                </p>
+              </button>
+              {d.phone ? (
+                <a
+                  href={waUrl(d, shop)}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => onRemind(d)}
+                  aria-label={`Relancer ${d.name} sur WhatsApp`}
+                  className="tap btn-press flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl bg-mint px-3.5 text-xs font-extrabold text-on-mint"
+                >
+                  <MessageCircle size={15} aria-hidden="true" /> Relancer
+                </a>
+              ) : (
+                <span className="shrink-0 text-[11px] font-semibold text-muted">Pas de numéro</span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 export default function Debts({ onPremium }: { onPremium: () => void }) {
-  const { debts, profile, addClient, addDebtMove, removeClient } = useStore();
+  const { debts, profile, addClient, addDebtMove, removeClient, markReminded } = useStore();
   const [dir, setDir] = useState<DebtDir>("credit");
   const [selected, setSelected] = useState<string | null>(null);
   const [sheetClient, setSheetClient] = useState(false);
@@ -144,13 +221,7 @@ export default function Debts({ onPremium }: { onPremium: () => void }) {
     return Math.min(100, Math.round((d.payments.reduce((s, p) => s + p.amount, 0) / total) * 100));
   };
 
-  const waLink = client && client.phone
-    ? `https://wa.me/225${client.phone.replace(/\s/g, "")}?text=${encodeURIComponent(
-        `Bonjour ${client.name}, c'est ${profile?.shop ?? "ta boutique"}. Il te reste ${fmtF(
-          debtBalance(client)
-        )} à régler. Tu peux passer quand tu veux. Merci !`
-      )}`
-    : null;
+  const waLink = client && client.phone ? waUrl(client, profile?.shop ?? "ta boutique") : null;
 
   return (
     <div className="pb-32">
@@ -198,6 +269,20 @@ export default function Debts({ onPremium }: { onPremium: () => void }) {
                 <p className="mt-1 font-display text-base font-extrabold tabular-nums">{stats.active}</p>
               </div>
             </div>
+
+            {dir === "credit" && (
+              <RelanceCard
+                debts={debts}
+                shop={profile?.shop ?? "ta boutique"}
+                isFree={isFree}
+                onPremium={onPremium}
+                onRemind={(d) => {
+                  markReminded(d.id);
+                  showToast(`Relance envoyée à ${d.name}`);
+                }}
+                onOpen={setSelected}
+              />
+            )}
 
             {isFree && (
               <p className="mt-4 flex items-center gap-1.5 text-[11px] font-semibold text-muted">
@@ -302,6 +387,7 @@ export default function Debts({ onPremium }: { onPremium: () => void }) {
                     {clientDir === "credit" && waLink && (
                       <a
                         href={waLink}
+                        onClick={() => client && markReminded(client.id)}
                         target="_blank"
                         rel="noreferrer"
                         title="Relancer sur WhatsApp"

@@ -21,11 +21,18 @@ export const CHARIOW_STORE = "https://nunovjiz.mychariow.shop";
    (Debts FREE_LIMIT, History "Tout", Reports "Mois", exports). Le cloud n'apparaît que s'il est branché. */
 const PREMIUM_FEATURES = [
   "Clients crédit illimités",
+  "Liste « à relancer » + WhatsApp en 1 geste",
+  "Marge par article et top 5",
+  "Reçu à ton nom (ville, numéro, message)",
+  "Équipe de vendeuses illimitée",
   "Historique complet",
   "Rapports du mois",
   "Export PDF & Excel",
   ...(cloudReady ? ["Sauvegarde cloud"] : []),
 ];
+
+/* Annuel et À vie : vérifiés dans Reports (plan "year" | "life") */
+const LONG_EXTRAS = ["Dossier 12 mois pour un prêt (microfinance, banque)"];
 
 export const PLANS: PlanDef[] = [
   {
@@ -34,7 +41,7 @@ export const PLANS: PlanDef[] = [
     price: "0 F",
     amount: 0,
     per: "pour toujours",
-    features: ["Ventes, dépenses & stock illimités", "5 clients crédit", "Rapports jour et semaine", "Historique 30 jours", "100% hors-ligne"],
+    features: ["Ventes, dépenses & stock illimités", "5 clients crédit", "1 vendeuse", "Rapports jour et semaine", "Historique 30 jours", "100% hors-ligne"],
   },
   {
     id: "pro",
@@ -54,7 +61,7 @@ export const PLANS: PlanDef[] = [
     amount: 15000,
     per: "/ an",
     tag: "Économise 37%",
-    features: PREMIUM_FEATURES,
+    features: ["Tout le Premium", ...LONG_EXTRAS, "Prise en main de 30 min par WhatsApp"],
     chariowUrl: "https://nunovjiz.mychariow.shop/prd_h95p8e2k",
   },
   {
@@ -63,12 +70,12 @@ export const PLANS: PlanDef[] = [
     price: "25 000 F",
     amount: 25000,
     per: "une seule fois",
-    features: ["Tout le Premium", "Payé une seule fois", "Mises à jour à vie", "Support prioritaire"],
+    features: ["Tout le Premium", ...LONG_EXTRAS, "Payé une seule fois", "Mises à jour à vie", "Support prioritaire"],
     chariowUrl: "https://nunovjiz.mychariow.shop/prd_8e5bj3vn",
   },
 ];
 
-/** Moyens de paiement acceptés via CinetPay — logos 16:9 dans public/payments/ */
+/** Moyens de paiement mobile money affichés — logos 16:9 dans public/payments/ */
 export const PAYMENTS: { name: string; color: string; short: string; logo: string }[] = [
   { name: "Wave", color: "#1dc4f2", short: "W", logo: "./payments/wave.webp" },
   { name: "Orange Money", color: "#ff7900", short: "OM", logo: "./payments/orange-money.webp" },

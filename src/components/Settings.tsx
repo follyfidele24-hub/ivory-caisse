@@ -40,6 +40,9 @@ import CurrencyPicker from "./CurrencyPicker";
 import Legal, { type LegalDoc } from "./Legal";
 import InstallApp from "./InstallApp";
 
+/** Plan gratuit : une seule vendeuse en plus du patron */
+const FREE_SELLERS = 1;
+
 export default function Settings({ onPremium, onBack }: { onPremium: () => void; onBack: () => void }) {
   const {
     profile,
@@ -70,6 +73,9 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
   const [pinA, setPinA] = useState("");
   const [pinB, setPinB] = useState("");
   const [newSeller, setNewSeller] = useState("");
+  const [rcCity, setRcCity] = useState(profile?.receipt?.city ?? "");
+  const [rcPhone, setRcPhone] = useState(profile?.receipt?.phone ?? "");
+  const [rcThanks, setRcThanks] = useState(profile?.receipt?.thanks ?? "");
   const [curOpen, setCurOpen] = useState(false);
   const [draftCur, setDraftCur] = useState(profile?.currency ?? "XOF");
   const [legal, setLegal] = useState<LegalDoc | null>(null);
@@ -421,6 +427,14 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
             ))}
           </div>
         )}
+        {isFree && sellers.length >= FREE_SELLERS ? (
+          <button
+            onClick={onPremium}
+            className="tap btn-press mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-brand/30 bg-brand/10 text-sm font-bold text-brand2"
+          >
+            <Lock size={14} aria-hidden="true" /> Plan gratuit : {FREE_SELLERS} vendeuse · Équipe illimitée en Premium
+          </button>
+        ) : (
         <div className="mt-3 flex gap-2">
           <input
             value={newSeller}
@@ -447,6 +461,55 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
             <UserPlus size={16} />
           </Btn>
         </div>
+        )}
+      </div>
+
+      {/* Mon reçu (Premium) : coordonnées et message sur les reçus PDF et images */}
+      <p className="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-muted">Mon reçu</p>
+      <div className="card mb-4 p-4">
+        <p className="text-sm font-bold">Reçu à ton nom</p>
+        <p className="text-xs leading-relaxed text-muted">
+          Ville, numéro et message de remerciement sur chaque reçu, sans la mention Ivory Caisse.
+        </p>
+        {isFree ? (
+          <button
+            onClick={onPremium}
+            className="tap btn-press mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-brand/30 bg-brand/10 text-sm font-bold text-brand2"
+          >
+            <Lock size={14} aria-hidden="true" /> Personnaliser mon reçu · Premium
+          </button>
+        ) : (
+          <div className="mt-3 space-y-2.5">
+            {(
+              [
+                ["Ville ou quartier", rcCity, setRcCity, "Ex : Adjamé, Abidjan", 40, "text"],
+                ["Téléphone de la boutique", rcPhone, setRcPhone, "Ex : 07 08 12 34 56", 20, "tel"],
+                ["Message de remerciement", rcThanks, setRcThanks, "Ex : Merci, à bientôt chez Awa !", 60, "text"],
+              ] as const
+            ).map(([label, val, set, ph, max, type]) => (
+              <label key={label} className="block">
+                <span className="mb-1 block text-xs font-bold text-muted">{label}</span>
+                <input
+                  value={val}
+                  type={type}
+                  maxLength={max}
+                  onChange={(e) => set(e.target.value)}
+                  placeholder={ph}
+                  className="w-full rounded-2xl border border-line bg-panel2 px-4 py-3 text-sm font-semibold outline-none transition-colors placeholder:text-fg/40 focus:border-brand/50"
+                />
+              </label>
+            ))}
+            <Btn
+              className="w-full py-3"
+              onClick={() => {
+                updateProfile({ receipt: { city: rcCity.trim(), phone: rcPhone.trim(), thanks: rcThanks.trim() } });
+                showToast("Reçu enregistré");
+              }}
+            >
+              Enregistrer mon reçu
+            </Btn>
+          </div>
+        )}
       </div>
 
       {/* Sauvegarde cloud : affichée seulement quand Firebase est branché (sinon promesse impossible à tenir) */}
@@ -616,7 +679,7 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
           <BrandMark size={40} />
           <div className="flex-1">
             <p className="text-sm font-bold">Ivory Caisse</p>
-            <p className="text-xs text-muted">Version 2.5.1 · Membre depuis le {profile ? longDate(profile.created) : "—"}</p>
+            <p className="text-xs text-muted">Version 2.6.0 · Membre depuis le {profile ? longDate(profile.created) : "—"}</p>
           </div>
         </div>
         {/* Éditeur */}
