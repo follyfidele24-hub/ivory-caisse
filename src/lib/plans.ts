@@ -1,4 +1,5 @@
 import type { Plan } from "./store";
+import { cloudReady } from "./cloudFlag";
 
 export interface PlanDef {
   id: Plan;
@@ -16,13 +17,14 @@ export interface PlanDef {
 
 export const CHARIOW_STORE = "https://nunovjiz.mychariow.shop";
 
+/* Uniquement ce que l'app fait vraiment : chaque ligne correspond à un verrou dans le code
+   (Debts FREE_LIMIT, History "Tout", Reports "Mois", exports). Le cloud n'apparaît que s'il est branché. */
 const PREMIUM_FEATURES = [
   "Clients crédit illimités",
-  "Historique illimité",
+  "Historique complet",
+  "Rapports du mois",
   "Export PDF & Excel",
-  "Rapports hebdo & mensuels",
-  "Sauvegarde cloud",
-  "Rappels SMS clients",
+  ...(cloudReady ? ["Sauvegarde cloud"] : []),
 ];
 
 export const PLANS: PlanDef[] = [
@@ -32,7 +34,7 @@ export const PLANS: PlanDef[] = [
     price: "0 F",
     amount: 0,
     per: "pour toujours",
-    features: ["Ventes & dépenses illimitées", "5 clients crédit", "Rapport du jour", "100% hors-ligne"],
+    features: ["Ventes, dépenses & stock illimités", "5 clients crédit", "Rapports jour et semaine", "Historique 30 jours", "100% hors-ligne"],
   },
   {
     id: "pro",

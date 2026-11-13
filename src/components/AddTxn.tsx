@@ -273,7 +273,7 @@ export default function AddTxn({
       <div className="my-5 text-center">
         <p
           className={`font-display text-5xl font-extrabold tabular-nums tracking-tight ${
-            value > 0 ? (type === "sale" ? "text-mint" : "text-rose") : "text-fg/25"
+            value > 0 ? (type === "sale" ? "text-mint" : "text-rose") : "text-muted"
           }`}
         >
           {fmtF(value)}

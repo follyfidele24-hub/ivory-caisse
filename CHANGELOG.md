@@ -1,5 +1,28 @@
 # Ivory Caisse — Journal des changements
 
+## 2.5.1 — corrections du check-up
+
+### Promesses tenues
+- « Sauvegarde cloud » retirée des offres, de la FAQ, des réglages et des mentions légales tant que Firebase
+  n'est pas branché (elle réapparaît seule quand les clés VITE_FIREBASE_* sont fournies). Le message technique
+  « colle tes clés Firebase dans .env » n'est plus jamais montré aux clients.
+- « Rappels SMS clients » retiré : la fonction n'existait pas.
+- Les avantages Premium correspondent maintenant à de vrais verrous : historique complet (gratuit : 30 jours),
+  rapports du mois (gratuit : jour et semaine), clients crédit illimités (gratuit : 5), export PDF et Excel.
+- FAQ vol de téléphone : renvoie vers la sauvegarde fichier, qui existe pour tous.
+- Mentions légales : paiements traités par Chariow (et plus CinetPay), licences sans renouvellement automatique.
+
+### Lisibilité
+- Boutons pleins : orange foncé calculé pour chaque thème (contraste ≥ 4,6:1 avec le texte blanc, contre 2,6:1).
+- Vert et rouge du mode clair foncés ; montant « 0 F » lisible ; descriptions texte des graphiques.
+- Audit d'accessibilité automatique (axe, WCAG AA) : 0 erreur sur l'accueil, la caisse, le stock, les crédits,
+  les rapports et la saisie.
+
+### Sécurité
+- Mise à jour des bibliothèques : DOMPurify (via l'export PDF) et Capacitor, failles critiques corrigées.
+- Le site ne peut plus être affiché dans le cadre d'un autre site (X-Frame-Options, frame-ancestors).
+- Page 404 aux couleurs de l'app.
+
 ## 2.5.0
 
 - Mode clair par défaut partout (app, page d'accueil, pages statiques, barre du navigateur, écran de lancement).

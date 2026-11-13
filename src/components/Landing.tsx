@@ -23,6 +23,7 @@ import {
   PartyPopper,
 } from "lucide-react";
 import { PLANS, PAYMENTS } from "../lib/plans";
+import { cloudReady } from "../lib/cloudFlag";
 import { BrandMark, Btn } from "./ui";
 import Legal, { type LegalDoc } from "./Legal";
 import InstallApp from "./InstallApp";
@@ -106,7 +107,7 @@ function PhoneMock() {
           <div className="mx-auto mb-4 h-1.5 w-14 rounded-full bg-fg/10" />
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-deep font-display text-[10px] font-bold text-white">
+              <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-br from-action to-action2 font-display text-[10px] font-bold text-white">
                 A
               </div>
               <div>
@@ -119,7 +120,7 @@ function PhoneMock() {
               <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-brand" />
             </div>
           </div>
-          <div className="mb-3 rounded-2xl bg-gradient-to-br from-brand to-deep p-3">
+          <div className="mb-3 rounded-2xl bg-gradient-to-br from-action to-action2 p-3">
             <p className="text-[8px] font-semibold uppercase tracking-wider text-white/70">Profit du jour</p>
             <p className="font-display text-xl font-extrabold text-white">35 800 F</p>
             <div className="mt-1 flex items-center gap-1 text-[8px] font-semibold text-white/85">
@@ -250,11 +251,13 @@ const TESTIMONIALS = [
 const FAQ = [
   {
     q: "Ça marche vraiment sans internet ?",
-    a: "Oui. Toutes les ventes, dépenses, crédits et stocks sont enregistrés dans le téléphone. Tu peux couper le réseau, l'application continue de fonctionner. Internet ne sert qu'à la sauvegarde cloud et aux paiements Premium.",
+    a: "Oui. Toutes les ventes, dépenses, crédits et stocks sont enregistrés dans le téléphone. Tu peux couper le réseau, l'application continue de fonctionner. Internet ne sert qu'à activer le Premium" + (cloudReady ? " et à la sauvegarde cloud." : "."),
   },
   {
     q: "Et si je perds ou on me vole mon téléphone ?",
-    a: "Avec le Premium, tu choisis un code secret et tu sauvegardes tes données. Sur ton nouveau téléphone, tu entres le même code et tout revient : ventes, crédits, stock, équipe.",
+    a: cloudReady
+      ? "Avec le Premium, tu choisis un code secret et tu sauvegardes tes données. Sur ton nouveau téléphone, tu entres le même code et tout revient : ventes, crédits, stock, équipe."
+      : "Fais une sauvegarde régulière : Réglages, puis « Sauvegarder dans un fichier », et envoie-la sur ton WhatsApp. Sur ton nouveau téléphone, « Restaurer une sauvegarde » et tout revient : ventes, crédits, stock, équipe. L'app te rappelle de le faire.",
   },
   {
     q: "Comment je paie l'abonnement ?",
@@ -319,7 +322,7 @@ export default function Landing({ onStart }: { onStart: () => void }) {
           </div>
           <button
             onClick={onStart}
-            className="tap btn-press flex min-h-11 items-center gap-1.5 rounded-full bg-brand px-4 py-2 text-sm font-bold text-white"
+            className="tap btn-press flex min-h-11 items-center gap-1.5 rounded-full bg-action px-4 py-2 text-sm font-bold text-white"
           >
             Ouvrir l'app <ArrowRight size={15} />
           </button>
@@ -439,8 +442,8 @@ export default function Landing({ onStart }: { onStart: () => void }) {
           <div className="grid gap-8 md:grid-cols-3">
             {STEPS.map((s) => (
               <motion.div key={s.n} className="relative">
-                <span className="font-display text-[4.5rem] font-extrabold leading-none text-fg/[0.08]">{s.n}</span>
-                <h3 className="-mt-6 font-display text-xl font-bold tracking-tight">{s.title}</h3>
+                <span className="font-display text-4xl font-extrabold leading-none text-brand2 tabular-nums">{s.n}</span>
+                <h3 className="mt-3 font-display text-xl font-bold tracking-tight">{s.title}</h3>
                 <p className="mt-3 text-sm leading-relaxed text-muted">{s.desc}</p>
               </motion.div>
             ))}
@@ -482,7 +485,7 @@ export default function Landing({ onStart }: { onStart: () => void }) {
               {p.tag && (
                 <span
                   className={`absolute -top-3 left-5 rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider ${
-                    p.highlight ? "bg-gradient-to-r from-brand to-deep text-white" : "border border-line bg-panel2 text-brand2"
+                    p.highlight ? "bg-gradient-to-r from-action to-action2 text-white" : "border border-line bg-panel2 text-brand2"
                   }`}
                 >
                   {p.tag}
@@ -504,7 +507,7 @@ export default function Landing({ onStart }: { onStart: () => void }) {
                 onClick={onStart}
                 className={`tap btn-press mt-6 flex items-center justify-center gap-1.5 rounded-2xl py-3 text-sm font-bold ${
                   p.highlight
-                    ? "bg-brand text-white"
+                    ? "bg-action text-white"
                     : "border border-line bg-panel2"
                 }`}
               >

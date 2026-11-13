@@ -9,13 +9,16 @@ import {
 import { DAY, fmtF, fmtSigned, relDay, startOfDay, timeOf } from "../lib/format";
 import { useStore, type TxnType, type Txn } from "../lib/store";
 import { Seg, Toast } from "./ui";
+import { Lock } from "lucide-react";
 import TxnDetail from "./TxnDetail";
 
 type TypeFilter = "all" | TxnType;
 type Period = "7" | "30" | "all";
 
-export default function History({ onClose }: { onClose: () => void }) {
-  const { txns } = useStore();
+export default function History({ onClose, onPremium }: { onClose: () => void; onPremium?: () => void }) {
+  const { txns, profile } = useStore();
+  /* Gratuit : 30 derniers jours · Premium : historique complet */
+  const isFree = profile?.plan === "free";
   const [type, setType] = useState<TypeFilter>("all");
   const [period, setPeriod] = useState<Period>("30");
   const [q, setQ] = useState("");
@@ -110,12 +113,14 @@ export default function History({ onClose }: { onClose: () => void }) {
           ).map(([id, label]) => (
             <button
               key={id}
-              onClick={() => setPeriod(id)}
-              className={`tap btn-press rounded-full border px-3.5 py-2 text-xs font-bold transition-colors ${
+              onClick={() => (id === "all" && isFree ? onPremium?.() : setPeriod(id))}
+              className={`tap btn-press flex min-h-11 items-center gap-1 rounded-full border px-3.5 py-2 text-xs font-bold transition-colors ${
                 period === id ? "border-brand/50 bg-brand/15 text-brand2" : "border-line bg-panel2 text-muted"
               }`}
             >
+              {id === "all" && isFree && <Lock size={11} aria-hidden="true" />}
               {label}
+              {id === "all" && isFree && <span className="sr-only"> (Premium)</span>}
             </button>
           ))}
           <div className="ml-auto flex items-center gap-2 text-[10px] font-bold">

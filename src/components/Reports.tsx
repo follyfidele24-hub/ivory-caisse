@@ -127,10 +127,10 @@ export default function Reports({ onPremium }: { onPremium: () => void }) {
         options={[
           { id: "day", label: "Jour" },
           { id: "week", label: "Semaine" },
-          { id: "month", label: "Mois" },
+          { id: "month", label: isFree ? "Mois · Premium" : "Mois" },
         ]}
         value={range}
-        onChange={setRange}
+        onChange={(r) => (r === "month" && isFree ? onPremium() : setRange(r))}
       />
 
       <div className="mt-5 grid grid-cols-3 gap-2.5">

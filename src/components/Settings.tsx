@@ -234,7 +234,7 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
           onClick={onPremium}
           className="tap btn-press mb-4 flex w-full items-center gap-3 rounded-[1.5rem] border border-brand/40 bg-gradient-to-r from-brand/20 to-transparent p-4 text-left"
         >
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-deep text-white">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-action to-action2 text-white">
             <Crown size={18} />
           </div>
           <div className="flex-1">
@@ -449,7 +449,9 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
         </div>
       </div>
 
-      {/* Sauvegarde cloud */}
+      {/* Sauvegarde cloud : affichée seulement quand Firebase est branché (sinon promesse impossible à tenir) */}
+      {cloudReady && (
+        <>
       <p className="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-muted">Sauvegarde cloud</p>
       <div className="card mb-4 p-4">
         <div className="flex items-center gap-3.5">
@@ -471,10 +473,6 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
           >
             <Lock size={14} /> Réservé au Premium — Débloquer
           </button>
-        ) : !cloudReady ? (
-          <p className="mt-4 rounded-2xl border border-line bg-panel2 px-4 py-3 text-xs leading-relaxed text-muted">
-            Cloud prêt à activer : colle tes clés Firebase dans le fichier <span className="font-bold text-cream">.env</span>, puis relance le build. Guide complet : <span className="font-bold text-cream">DEPLOYMENT.md</span>.
-          </p>
         ) : (
           <div className="mt-4">
             <input
@@ -497,6 +495,9 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
           </div>
         )}
       </div>
+
+        </>
+      )}
 
       {/* Données */}
       <p className="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-muted">Données</p>
@@ -615,7 +616,7 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
           <BrandMark size={40} />
           <div className="flex-1">
             <p className="text-sm font-bold">Ivory Caisse</p>
-            <p className="text-xs text-muted">Version 2.5.0 · Membre depuis le {profile ? longDate(profile.created) : "—"}</p>
+            <p className="text-xs text-muted">Version 2.5.1 · Membre depuis le {profile ? longDate(profile.created) : "—"}</p>
           </div>
         </div>
         {/* Éditeur */}

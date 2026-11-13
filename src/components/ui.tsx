@@ -119,7 +119,7 @@ export function Seg<T extends string>({
 }) {
   const activeText = { brand: "text-white", mint: "text-on-mint", rose: "text-white" }[accent];
   const accentCls = {
-    brand: "bg-gradient-to-br from-brand to-deep text-white shadow-[0_6px_20px_-6px_rgba(255,122,26,0.7)]",
+    brand: "bg-gradient-to-br from-action to-action2 text-white shadow-[0_6px_20px_-6px_rgba(255,122,26,0.7)]",
     mint: "bg-mint text-on-mint",
     rose: "bg-rose text-white",
   }[accent];
@@ -231,7 +231,7 @@ export function Btn({
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: BtnVariant }) {
   const styles: Record<BtnVariant, string> = {
     brand:
-      "bg-gradient-to-br from-brand to-deep text-white shadow-[0_10px_28px_-8px_rgba(255,122,26,0.65)]",
+      "bg-gradient-to-br from-action to-action2 text-white shadow-[0_10px_28px_-8px_rgba(255,122,26,0.65)]",
     mint: "bg-mint text-on-mint",
     soft: "border border-line bg-panel2 text-cream",
     ghost: "bg-transparent text-muted",
@@ -250,7 +250,7 @@ export function Btn({
 /* ---------- Avatar initials ---------- */
 
 const AV_COLORS = [
-  "from-brand to-deep",
+  "from-action to-action2",
   "from-mint to-teal-700",
   "from-violet-400 to-violet-700",
   "from-sky-400 to-blue-700",

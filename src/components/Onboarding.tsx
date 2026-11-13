@@ -124,7 +124,7 @@ export default function Onboarding() {
                 initial={{ rotate: -20, scale: 0 }}
                 animate={{ rotate: 0, scale: 1 }}
                 transition={{ type: "spring", stiffness: 220, damping: 14, delay: 0.15 }}
-                className="mb-6 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-brand to-deep text-white shadow-[0_16px_40px_-12px_rgba(255,122,26,0.8)]"
+                className="mb-6 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-action to-action2 text-white shadow-[0_16px_40px_-12px_rgba(255,122,26,0.8)]"
               >
                 <PartyPopper size={28} />
               </motion.div>

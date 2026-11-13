@@ -18,6 +18,29 @@ export const THEMES: Theme[] = [
   { id: "indigo", name: "Indigo nuit", brand: "#5b6cff", brand2: "#9aa8ff", deep: "#3b48d6", preview: "linear-gradient(135deg,#9aa8ff,#3b48d6)" },
 ];
 
+/* ---------- Couleur des boutons pleins ----------
+   Texte blanc sur l'orange vif = contraste 2,6:1 (illisible au soleil). On fonce la couleur du
+   thème jusqu'à au moins 4,6:1 avec le blanc (WCAG AA), en gardant la même teinte. */
+const lum = (hex: string) => {
+  const n = parseInt(hex.slice(1), 16);
+  const ch = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => {
+    const c = v / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2];
+};
+const darken = (hex: string, k: number) => {
+  const n = parseInt(hex.slice(1), 16);
+  const f = (v: number) => Math.round(v * (1 - k)).toString(16).padStart(2, "0");
+  return `#${f((n >> 16) & 255)}${f((n >> 8) & 255)}${f(n & 255)}`;
+};
+export const contrastWithWhite = (hex: string) => 1.05 / (lum(hex) + 0.05);
+export function actionColor(hex: string): string {
+  let c = hex;
+  for (let k = 0; contrastWithWhite(c) < 4.6 && k < 0.9; k += 0.02) c = darken(hex, k);
+  return c;
+}
+
 const byId = new Map(THEMES.map((t) => [t.id, t]));
 export const DEFAULT_THEME = "sunset";
 
@@ -39,6 +62,9 @@ export function applyTheme(id?: string, mode?: Mode): void {
   /* brand2 sert de couleur de texte d'accent : on la fonce sur fond clair */
   r.style.setProperty("--color-brand2", m === "light" ? `color-mix(in oklab, ${t.deep} 72%, black)` : t.brand2);
   r.style.setProperty("--color-deep", t.deep);
+  const action = actionColor(t.deep);
+  r.style.setProperty("--color-action", action);
+  r.style.setProperty("--color-action2", darken(action, 0.12));
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute("content", m === "light" ? "#f6f7fa" : "#0A0A0E");
 }

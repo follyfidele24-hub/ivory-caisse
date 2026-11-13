@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowLeft, AtSign, Building2, Clock, MessageCircle, Phone, ShieldCheck } from "lucide-react";
 import { CONTACT, whatsappLink } from "../lib/contact";
+import { cloudReady } from "../lib/cloudFlag";
 
 export type LegalDoc = "terms" | "privacy" | "contact";
 
@@ -28,13 +29,13 @@ const DOCS: Record<LegalDoc, { title: string; intro: string; sections: Section[]
         h: "3. Votre responsabilité",
         items: [
           "Vous êtes responsable de l'exactitude des ventes, dépenses et crédits que vous saisissez.",
-          "Vous devez sauvegarder régulièrement vos données (export local ou sauvegarde cloud Premium).",
+          `Vous devez sauvegarder régulièrement vos données (fichier de sauvegarde${cloudReady ? " ou sauvegarde cloud Premium" : ""}).`,
           "Vous protégez votre code PIN et votre appareil.",
         ],
       },
       {
         h: "4. Abonnement Premium & paiements",
-        p: "Certaines fonctions nécessitent un abonnement Premium. Les paiements sont traités par notre prestataire (CinetPay) qui accepte le mobile money et les cartes. Les montants sont facturés dans la devise indiquée au moment du paiement. Vous pouvez résilier à tout moment.",
+        p: "Certaines fonctions nécessitent une licence Premium (mensuelle, annuelle ou à vie). Le paiement se fait sur la boutique en ligne Ivory Gestion, opérée par Chariow, qui encaisse le mobile money et les cartes. Une clé d'activation est envoyée par e-mail. Les licences sont des achats uniques, sans renouvellement automatique.",
       },
       {
         h: "5. Utilisation acceptable",
@@ -72,15 +73,17 @@ const DOCS: Record<LegalDoc, { title: string; intro: string; sections: Section[]
       },
       {
         h: "2. Données stockées sur votre appareil",
-        p: "Vos ventes, dépenses, crédits, stock, équipe et profil sont enregistrés localement sur votre téléphone. Ils ne quittent jamais votre appareil tant que vous ne les partagez pas ou ne les sauvegardez pas dans le cloud.",
+        p: "Vos ventes, dépenses, crédits, stock, équipe et profil sont enregistrés localement sur votre téléphone. Ils ne quittent jamais votre appareil tant que vous ne les partagez pas" + (cloudReady ? " ou ne les sauvegardez pas dans le cloud." : "."),
       },
       {
         h: "3. Sauvegarde cloud (option Premium)",
-        p: "Si vous activez la sauvegarde cloud, vos données chiffrées sont envoyées sur nos serveurs (Firebase) associées au code secret que vous choisissez, afin de les restaurer en cas de perte du téléphone.",
+        p: cloudReady
+          ? "Si vous activez la sauvegarde cloud, vos données chiffrées sont envoyées sur nos serveurs (Firebase) associées au code secret que vous choisissez, afin de les restaurer en cas de perte du téléphone."
+          : "La sauvegarde cloud n'est pas encore proposée : aucune donnée n'est envoyée sur nos serveurs. Lorsqu'elle sera disponible, elle restera facultative et cette politique sera mise à jour avant son activation.",
       },
       {
         h: "4. Paiements",
-        p: "Les paiements Premium sont traités par CinetPay. Nous ne stockons pas vos informations bancaires ou mobile money.",
+        p: "Les paiements Premium sont traités par Chariow, la plateforme de la boutique Ivory Gestion. Nous ne recevons ni ne stockons vos informations bancaires ou mobile money. Pour vérifier une licence, l'application envoie la clé et un identifiant anonyme du téléphone ; la clé est conservée sous forme chiffrée (empreinte).",
       },
       {
         h: "5. Ce que nous ne faisons jamais",

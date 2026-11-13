@@ -146,7 +146,7 @@ export default function Premium({ onClose, initialStep = "plans" }: { onClose: (
                       {p.tag && (
                         <span
                           className={`absolute -top-2.5 right-4 rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider ${
-                            p.highlight ? "bg-gradient-to-r from-brand to-deep text-white" : "border border-line bg-panel2 text-brand2"
+                            p.highlight ? "bg-gradient-to-r from-action to-action2 text-white" : "border border-line bg-panel2 text-brand2"
                           }`}
                         >
                           {p.tag}
@@ -367,7 +367,7 @@ export default function Premium({ onClose, initialStep = "plans" }: { onClose: (
                 initial={{ scale: 0, rotate: -30 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: "spring", stiffness: 220, damping: 13, delay: 0.1 }}
-                className="mb-6 flex h-24 w-24 items-center justify-center rounded-[2rem] bg-gradient-to-br from-brand to-deep shadow-[0_24px_60px_-16px_rgba(255,122,26,0.8)]"
+                className="mb-6 flex h-24 w-24 items-center justify-center rounded-[2rem] bg-gradient-to-br from-action to-action2 shadow-[0_24px_60px_-16px_rgba(255,122,26,0.8)]"
               >
                 <Crown size={44} className="text-white" />
               </motion.div>
@@ -376,7 +376,7 @@ export default function Premium({ onClose, initialStep = "plans" }: { onClose: (
                   Bienvenue dans <span className="text-brand2">Premium !</span>
                 </h1>
                 <p className="mx-auto mt-3 max-w-xs text-sm leading-relaxed text-muted">
-                  Export PDF & Excel, clients illimités, sauvegarde cloud… tout est débloqué. Au travail !
+                  Clients crédit illimités, historique complet, rapports du mois, export PDF et Excel : tout est débloqué. Au travail !
                 </p>
               </motion.div>
               <motion.div

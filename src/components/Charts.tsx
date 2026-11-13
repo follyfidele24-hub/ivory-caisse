@@ -150,7 +150,10 @@ export function TrendChart({
     },
   };
 
-  return <Line data={data} options={options} />;
+  /* Alternative texte pour les lecteurs d'écran : totaux de la période */
+  const tot = (a: number[]) => a.reduce((x, y) => x + y, 0).toLocaleString("fr-FR");
+  const label = `Courbe des ventes et des dépenses sur ${labels.length} jours : ventes ${tot(sales)} F, dépenses ${tot(expenses)} F.`;
+  return <Line data={data} options={options} role="img" aria-label={label} />;
 }
 
 /** Répartition des dépenses par catégorie — anneau */
@@ -205,5 +208,6 @@ export function CategoryDonut({ labels, values }: { labels: string[]; values: nu
     },
   };
 
-  return <Doughnut data={data} options={options} />;
+  const label = `Répartition des dépenses : ${labels.map((l, i) => `${l} ${values[i].toLocaleString("fr-FR")} F`).join(", ")}.`;
+  return <Doughnut data={data} options={options} role="img" aria-label={label} />;
 }

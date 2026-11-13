@@ -166,7 +166,7 @@ export default function Debts({ onPremium }: { onPremium: () => void }) {
               </div>
               <button
                 onClick={openNewClient}
-                className="tap btn-press flex items-center gap-1.5 rounded-2xl bg-gradient-to-br from-brand to-deep px-4 py-2.5 text-sm font-bold text-white shadow-[0_8px_24px_-8px_rgba(255,122,26,0.6)]"
+                className="tap btn-press flex items-center gap-1.5 rounded-2xl bg-gradient-to-br from-action to-action2 px-4 py-2.5 text-sm font-bold text-white shadow-[0_8px_24px_-8px_rgba(255,122,26,0.6)]"
               >
                 <Plus size={16} /> {T.addLabel}
               </button>

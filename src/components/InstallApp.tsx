@@ -73,7 +73,7 @@ export default function InstallApp({ full = false }: { full?: boolean }) {
       </button>
 
       <Sheet open={open} onClose={() => setOpen(false)}>
-        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-brand to-deep text-white shadow-[0_16px_40px_-12px_rgba(255,122,26,0.75)]">
+        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-action to-action2 text-white shadow-[0_16px_40px_-12px_rgba(255,122,26,0.75)]">
           <Smartphone size={27} />
         </div>
         <h2 className="text-center font-display text-2xl font-extrabold">Installer Ivory Caisse</h2>

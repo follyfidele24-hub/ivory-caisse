@@ -339,7 +339,7 @@ export default function Dashboard({
           onClick={onPremium}
           className="tap btn-press mt-3 flex w-full items-center gap-3 overflow-hidden rounded-[1.5rem] border border-brand/30 bg-gradient-to-r from-brand/15 to-transparent p-4 text-left"
         >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-deep text-white">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-action to-action2 text-white">
             <Crown size={17} />
           </div>
           <div className="flex-1">
@@ -446,7 +446,7 @@ export default function Dashboard({
       </Sheet>
 
       <AnimatePresence>
-        {histOpen && <History onClose={() => setHistOpen(false)} />}
+        {histOpen && <History onClose={() => setHistOpen(false)} onPremium={onPremium} />}
         {closeOpen && <DayClose onClose={() => setCloseOpen(false)} />}
       </AnimatePresence>
     </div>

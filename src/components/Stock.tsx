@@ -186,7 +186,7 @@ export default function Stock() {
         </div>
         <button
           onClick={openAdd}
-          className="tap btn-press flex items-center gap-1.5 rounded-2xl bg-gradient-to-br from-brand to-deep px-4 py-2.5 text-sm font-bold text-white shadow-[0_8px_24px_-8px_rgba(255,122,26,0.6)]"
+          className="tap btn-press flex items-center gap-1.5 rounded-2xl bg-gradient-to-br from-action to-action2 px-4 py-2.5 text-sm font-bold text-white shadow-[0_8px_24px_-8px_rgba(255,122,26,0.6)]"
         >
           <Plus size={16} /> Produit
         </button>
@@ -204,7 +204,7 @@ export default function Stock() {
             <p className="text-sm font-bold text-rose">
               {stats.low.length === 1 ? "1 article à commander" : `${stats.low.length} articles à commander`}
             </p>
-            <p className="mt-0.5 text-xs leading-relaxed text-rose/80">
+            <p className="mt-0.5 text-xs leading-relaxed text-rose">
               {stats.low.map((p) => `${p.name} (${p.stock})`).join(" · ")}
             </p>
             <a

@@ -35,7 +35,7 @@ export default function BottomNav({
                 if (navigator.vibrate) navigator.vibrate(12);
                 onAdd();
               }}
-              className="tap flex h-16 w-16 items-center justify-center rounded-[1.4rem] bg-gradient-to-br from-brand to-deep text-white shadow-[0_16px_36px_-8px_rgba(255,122,26,0.75)] ring-4 ring-ink"
+              className="tap flex h-16 w-16 items-center justify-center rounded-[1.4rem] bg-gradient-to-br from-action to-action2 text-white shadow-[0_16px_36px_-8px_rgba(255,122,26,0.75)] ring-4 ring-ink"
               aria-label="Nouveau mouvement"
             >
               <Plus size={30} strokeWidth={2.6} />
