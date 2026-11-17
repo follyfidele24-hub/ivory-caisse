@@ -1,5 +1,5 @@
 /* Ivory Caisse — mise en cache hors-ligne avec mises à jour fiables. */
-const CACHE = "ivory-caisse-v8";
+const CACHE = "ivory-caisse-v9";
 const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-512.png"];
 
 self.addEventListener("install", (event) => {

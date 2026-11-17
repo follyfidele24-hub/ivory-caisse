@@ -5,6 +5,7 @@ import { fmtF } from "./lib/format";
 import { setCurrency } from "./lib/currency";
 import { applyTheme } from "./lib/themes";
 import { NATIVE_SECURE_RESUME } from "./lib/native";
+import { Capacitor } from "@capacitor/core";
 import { clearPending, getPending, recheckLicense, verifyPayment } from "./lib/payments";
 import { longDate } from "./lib/format";
 import Dashboard from "./components/Dashboard";
@@ -245,7 +246,7 @@ function Root() {
   return (
     <Suspense fallback={<ScreenLoader />}>
     <AnimatePresence mode="wait">
-      {!launched ? (
+      {!launched && !Capacitor.isNativePlatform() ? (
         <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 0.98 }}>
           <Landing onStart={markLaunched} />
         </motion.div>

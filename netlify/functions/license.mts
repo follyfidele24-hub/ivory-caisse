@@ -26,13 +26,22 @@ const kv = (): LicKV => {
   };
 };
 
+/* L'app Android/iPhone (Capacitor) appelle depuis https://localhost ou capacitor://localhost */
+const CORS: Record<string, string> = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Max-Age": "86400",
+};
+
 const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" },
+    headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store", ...CORS },
   });
 
 export default async (req: Request) => {
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   const route = new URL(req.url).pathname.replace(/^\/api\/license\/?/, "");
   const E = env();
   try {

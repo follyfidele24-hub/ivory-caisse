@@ -1,5 +1,12 @@
 # Ivory Caisse — Journal des changements
 
+## 2.7.0 — application Android
+
+- L'app native (APK) appelle le serveur en ligne pour les licences et paiements ; le serveur accepte ces appels (CORS).
+- Dans l'app native, la page d'accueil marketing est sautée : on arrive directement sur l'inscription.
+- Icône Android adaptative et écran de lancement au nouveau logo, fond clair ; barre système claire.
+- L'APK se construit tout seul sur GitHub à chaque mise à jour de la branche ivory-caisse-app.
+
 ## 2.6.1 — suite de l'audit
 
 - Landing : vraies captures de l'app (Caisse, Rapports) ; titre des prix corrigé (« Premium dès 2 000 F par mois ») ;

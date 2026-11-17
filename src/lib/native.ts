@@ -10,7 +10,10 @@ export async function setupNativeRuntime(): Promise<void> {
   if (!Capacitor.isNativePlatform()) return;
 
   try {
-    await StatusBar.setStyle({ style: Style.Dark });
+    /* Fond clair par défaut : icônes de la barre système en foncé */
+    const dark = document.documentElement.dataset.mode === "dark";
+    await StatusBar.setStyle({ style: dark ? Style.Dark : Style.Light });
+    await StatusBar.setBackgroundColor({ color: dark ? "#0A0A0E" : "#f6f7fa" });
   } catch {
     /* Certaines versions WebView gèrent directement la barre système. */
   }

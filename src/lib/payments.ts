@@ -5,6 +5,10 @@
  * vérifier le résultat par le serveur avant de débloquer quoi que ce soit.
  */
 import type { Plan } from "./store";
+import { Capacitor } from "@capacitor/core";
+
+/* Dans l'app Android/iPhone, la page est servie en local : les appels vont au serveur en ligne. */
+const API = Capacitor.isNativePlatform() ? "https://ivory-caisse.netlify.app" : "";
 
 const DEVICE_KEY = "ivorycaisse_device";
 const PENDING_KEY = "ivorycaisse_pay_pending";
@@ -54,7 +58,7 @@ export const clearPending = () => {
 /** Le paiement en ligne est-il disponible ? (serveur joignable + clés configurées) */
 export async function paymentsEnabled(): Promise<boolean> {
   try {
-    const r = await fetch("/api/pay/status", { cache: "no-store" });
+    const r = await fetch(API + "/api/pay/status", { cache: "no-store" });
     if (!r.ok) return false;
     return Boolean(((await r.json()) as { enabled?: boolean }).enabled);
   } catch {
@@ -64,7 +68,7 @@ export async function paymentsEnabled(): Promise<boolean> {
 
 /** Crée le paiement côté serveur puis ouvre le guichet CinetPay. */
 export async function startPayment(plan: PaidPlan, name: string): Promise<void> {
-  const r = await fetch("/api/pay/init", {
+  const r = await fetch(API + "/api/pay/init", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ plan, device: deviceId(), name }),
@@ -87,7 +91,7 @@ export type VerifyResult =
 
 export async function verifyPayment(tx: string): Promise<VerifyResult> {
   try {
-    const r = await fetch("/api/pay/verify", {
+    const r = await fetch(API + "/api/pay/verify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ tx, device: deviceId() }),
@@ -112,7 +116,7 @@ export async function verifyPayment(tx: string): Promise<VerifyResult> {
 
 export async function licensesEnabled(): Promise<boolean> {
   try {
-    const r = await fetch("/api/license/status", { cache: "no-store" });
+    const r = await fetch(API + "/api/license/status", { cache: "no-store" });
     if (!r.ok) return false;
     return Boolean(((await r.json()) as { enabled?: boolean }).enabled);
   } catch {
@@ -126,7 +130,7 @@ export type LicenseResult =
 
 async function licenseCall(route: "activate" | "recheck", key: string): Promise<LicenseResult> {
   try {
-    const r = await fetch(`/api/license/${route}`, {
+    const r = await fetch(`${API}/api/license/${route}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ key, device: deviceId() }),

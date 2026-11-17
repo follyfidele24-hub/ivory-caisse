@@ -2,6 +2,8 @@ name: Construire l'APK Android
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ivory-caisse-app]
 
 permissions:
   contents: write
