@@ -1,5 +1,5 @@
 /* Ivory Caisse — mise en cache hors-ligne avec mises à jour fiables. */
-const CACHE = "ivory-caisse-v10";
+const CACHE = "ivory-caisse-v11";
 const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-512.png"];
 
 self.addEventListener("install", (event) => {
@@ -25,7 +25,7 @@ self.addEventListener("fetch", (event) => {
   const path = new URL(event.request.url).pathname;
   if (path.startsWith("/api/")) return;
   /* Liens courts de téléchargement : redirection directe, hors cache */
-  if (path === "/apk" || path === "/android" || path === "/telecharger") return;
+  if (path === "/apk" || path === "/android" || path === "/telecharger" || path.endsWith(".apk")) return;
 
   // Navigation : réseau d'abord pour obtenir les mises à jour, cache en secours.
   if (event.request.mode === "navigate") {

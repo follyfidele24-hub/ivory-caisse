@@ -7,7 +7,7 @@
 
 [[redirects]]
   from = "/apk"
-  to = "https://github.com/follyfidele24-hub/ivory-caisse/releases/download/apk-beta-2/ivory-caisse-beta.apk"
+  to = "/ivory-caisse.apk"
   status = 302
   force = true
 
@@ -22,6 +22,13 @@
   to = "/apk"
   status = 301
   force = true
+
+[[headers]]
+  for = "/ivory-caisse.apk"
+  [headers.values]
+    Content-Type = "application/vnd.android.package-archive"
+    Content-Disposition = "attachment; filename=ivory-caisse.apk"
+    Cache-Control = "no-cache"
 
 [[headers]]
   for = "/sw.js"
