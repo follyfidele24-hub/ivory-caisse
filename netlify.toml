@@ -5,6 +5,24 @@
 [build.environment]
   NODE_VERSION = "22"
 
+[[redirects]]
+  from = "/apk"
+  to = "https://github.com/follyfidele24-hub/ivory-caisse/releases/download/apk-beta-2/ivory-caisse-beta.apk"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/android"
+  to = "/apk"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/telecharger"
+  to = "/apk"
+  status = 301
+  force = true
+
 [[headers]]
   for = "/sw.js"
   [headers.values]
