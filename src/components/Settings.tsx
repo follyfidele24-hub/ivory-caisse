@@ -23,10 +23,7 @@ import {
   ShieldCheck,
   Trash2,
   Upload,
-  UserPlus,
-  Users,
   WifiOff,
-  X,
 } from "lucide-react";
 import { longDate } from "../lib/format";
 import { backupToCloud, cloudReady, restoreFromCloud } from "../lib/firebase";
@@ -34,14 +31,14 @@ import { currencyByCode } from "../lib/currency";
 import { THEMES } from "../lib/themes";
 import { buildBackup, daysSinceBackup, readBackup, saveBackup, type BackupFile } from "../lib/backup";
 import type { ThemeMode } from "../lib/store";
-import { PLAN_LABEL, useStore } from "../lib/store";
+import { PLAN_LABEL, useStore, weakPin } from "../lib/store";
+import TeamCard from "./TeamCard";
 import { Avatar, BrandMark, Btn, Sheet, Toast } from "./ui";
 import CurrencyPicker from "./CurrencyPicker";
 import Legal, { type LegalDoc } from "./Legal";
 import InstallApp from "./InstallApp";
 
 /** Plan gratuit : une seule vendeuse en plus du patron */
-const FREE_SELLERS = 1;
 
 export default function Settings({ onPremium, onBack }: { onPremium: () => void; onBack: () => void }) {
   const {
@@ -54,8 +51,7 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
     debts,
     products,
     sellers,
-    addSeller,
-    removeSeller,
+    staff,
   } = useStore();
   const [editOpen, setEditOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
@@ -72,7 +68,6 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
   const [pinSheet, setPinSheet] = useState<"set" | "off" | null>(null);
   const [pinA, setPinA] = useState("");
   const [pinB, setPinB] = useState("");
-  const [newSeller, setNewSeller] = useState("");
   const [rcCity, setRcCity] = useState(profile?.receipt?.city ?? "");
   const [rcPhone, setRcPhone] = useState(profile?.receipt?.phone ?? "");
   const [rcThanks, setRcThanks] = useState(profile?.receipt?.thanks ?? "");
@@ -170,6 +165,14 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
 
   const savePin = () => {
     if (pinA.length !== 4 || pinA !== pinB) return;
+    if (weakPin(pinA)) {
+      showToast("PIN trop simple : évite 1234, 0000, 1212…");
+      return;
+    }
+    if (staff.some((x) => x.pin === pinA)) {
+      showToast("Ce PIN est déjà celui d'un vendeur");
+      return;
+    }
     updateProfile({ pin: pinA });
     setPinSheet(null);
     setPinA("");
@@ -178,6 +181,10 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
   };
 
   const disablePin = () => {
+    if (staff.length > 0) {
+      showToast("Retire d'abord les accès vendeurs : sans PIN patron, tout le monde aurait tous les droits");
+      return;
+    }
     if (pinA !== profile?.pin) {
       showToast("Code incorrect");
       return;
@@ -391,78 +398,9 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
         </div>
       </div>
 
-      {/* Mon équipe */}
+      {/* Mon équipe : accès vendeurs, règles, contrôle */}
       <p className="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-muted">Mon équipe</p>
-      <div className="card mb-4 p-4">
-        <div className="flex items-center gap-3.5">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-sky-400/25 bg-sky-400/10 text-sky-300">
-            <Users size={16} />
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-bold">Vendeurs & vendeuses</p>
-            <p className="text-xs leading-relaxed text-muted">
-              Chaque vente est attribuée à la personne qui encaisse.
-            </p>
-          </div>
-        </div>
-        {sellers.length > 0 && (
-          <div className="mt-3.5 flex flex-wrap gap-2">
-            {sellers.map((s) => (
-              <span
-                key={s}
-                className="flex items-center gap-1.5 rounded-full border border-mint/30 bg-mint/10 py-1.5 pl-3.5 pr-2 text-xs font-bold text-mint"
-              >
-                {s}
-                <button
-                  onClick={() => {
-                    removeSeller(s);
-                    showToast(`${s} retiré(e) de l'équipe`);
-                  }}
-                  className="tap flex items-center justify-center rounded-full bg-mint/15 p-1"
-                  aria-label={`Retirer ${s}`}
-                >
-                  <X size={10} />
-                </button>
-              </span>
-            ))}
-          </div>
-        )}
-        {isFree && sellers.length >= FREE_SELLERS ? (
-          <button
-            onClick={onPremium}
-            className="tap btn-press mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-brand/30 bg-brand/10 text-sm font-bold text-brand2"
-          >
-            <Lock size={14} aria-hidden="true" /> Plan gratuit : {FREE_SELLERS} vendeuse · Équipe illimitée en Premium
-          </button>
-        ) : (
-        <div className="mt-3 flex gap-2">
-          <input
-            value={newSeller}
-            onChange={(e) => setNewSeller(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && newSeller.trim().length >= 2) {
-                addSeller(newSeller);
-                setNewSeller("");
-                showToast("Membre ajouté à l'équipe");
-              }
-            }}
-            placeholder="Prénom (ex : Grâce)"
-            className="min-w-0 flex-1 rounded-2xl border border-line bg-panel2 px-4 py-3 text-sm font-semibold outline-none transition-colors placeholder:text-fg/25 focus:border-brand/50"
-          />
-          <Btn
-            className="shrink-0 px-4 py-3"
-            disabled={newSeller.trim().length < 2}
-            onClick={() => {
-              addSeller(newSeller);
-              setNewSeller("");
-              showToast("Membre ajouté à l'équipe");
-            }}
-          >
-            <UserPlus size={16} />
-          </Btn>
-        </div>
-        )}
-      </div>
+      <TeamCard onPremium={onPremium} notify={showToast} />
 
       {/* Mon reçu (Premium) : coordonnées et message sur les reçus PDF et images */}
       <p className="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-muted">Mon reçu</p>
@@ -679,7 +617,7 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
           <BrandMark size={40} />
           <div className="flex-1">
             <p className="text-sm font-bold">Ivory Caisse</p>
-            <p className="text-xs text-muted">Version 2.7.0 · Membre depuis le {profile ? longDate(profile.created) : "—"}</p>
+            <p className="text-xs text-muted">Version 2.8.0 · Membre depuis le {profile ? longDate(profile.created) : "—"}</p>
           </div>
         </div>
         {/* Éditeur */}

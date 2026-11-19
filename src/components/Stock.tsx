@@ -47,7 +47,7 @@ function Field({
 }
 
 export default function Stock() {
-  const { products, profile, sellers, addProduct, updateProduct, deleteProduct, sellCart, deleteTxn } = useStore();
+  const { products, profile, sellers, addProduct, updateProduct, deleteProduct, sellCart, deleteTxn, isStaff } = useStore();
   const [pane, setPane] = useState<Pane>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [undoId, setUndoId] = useState<string | null>(null);
@@ -153,7 +153,7 @@ export default function Stock() {
       seller ?? undefined
     );
     if (navigator.vibrate) navigator.vibrate([10, 40, 20]);
-    showToast(`Encaissé ${fmtF(cartTotal)}${cartMargin > 0 ? ` · marge ${fmtF(cartMargin)}` : ""}`, id ?? undefined);
+    showToast(`Encaissé ${fmtF(cartTotal)}${cartMargin > 0 && !isStaff ? ` · marge ${fmtF(cartMargin)}` : ""}`, id ?? undefined);
     setCart({});
     setSeller(null);
     setPane(null);
@@ -171,8 +171,8 @@ export default function Stock() {
             ? {
                 label: "Annuler",
                 onClick: () => {
-                  deleteTxn(undoId);
-                  showToast("Vente annulée · stock remis");
+                  const ok = deleteTxn(undoId);
+                  showToast(ok ? "Vente annulée · stock remis" : "Annulation refusée : demande au patron");
                 },
               }
             : undefined
@@ -182,14 +182,16 @@ export default function Stock() {
       <div className="mb-5 flex items-center justify-between">
         <div>
           <h1 className="font-display text-2xl font-extrabold tracking-tight">Stock</h1>
-          <p className="text-xs text-muted">Sache toujours ce qu'il te reste.</p>
+          <p className="text-xs text-muted">{isStaff ? "Consultation et vente. Le stock se corrige par le patron." : "Sache toujours ce qu'il te reste."}</p>
         </div>
+        {!isStaff && (
         <button
           onClick={openAdd}
           className="tap btn-press flex items-center gap-1.5 rounded-2xl bg-gradient-to-br from-action to-action2 px-4 py-2.5 text-sm font-bold text-white shadow-[0_8px_24px_-8px_rgba(255,122,26,0.6)]"
         >
           <Plus size={16} /> Produit
         </button>
+        )}
       </div>
 
       {/* Alerte rupture */}
@@ -220,11 +222,13 @@ export default function Stock() {
       )}
 
       {/* Statistiques */}
-      <div className="mb-5 grid grid-cols-3 gap-2.5">
+      <div className={`mb-5 grid gap-2.5 ${isStaff ? "grid-cols-2" : "grid-cols-3"}`}>
+        {!isStaff && (
         <div className="card p-3.5">
           <p className="text-[10px] font-bold uppercase tracking-wider text-muted">Valeur stock</p>
           <p className="mt-1 font-display text-base font-extrabold text-brand2 tabular-nums">{fmtF(stats.value)}</p>
         </div>
+        )}
         <div className="card p-3.5">
           <p className="text-[10px] font-bold uppercase tracking-wider text-muted">Produits</p>
           <p className="mt-1 font-display text-base font-extrabold tabular-nums">{stats.count}</p>
@@ -274,9 +278,10 @@ export default function Stock() {
             >
               <button
                 type="button"
-                onClick={() => openEdit(p)}
-                className="tap flex w-full items-center gap-3 text-left"
-                aria-label={`Modifier ${p.name}`}
+                onClick={() => !isStaff && openEdit(p)}
+                disabled={isStaff}
+                className="tap flex w-full items-center gap-3 text-left disabled:cursor-default"
+                aria-label={isStaff ? p.name : `Modifier ${p.name}`}
               >
                 <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border ${lv.icon}`}>
                   <Package size={18} aria-hidden="true" />
@@ -285,7 +290,7 @@ export default function Stock() {
                   <p className="truncate text-sm font-bold">{p.name}</p>
                   <p className="text-xs text-muted">
                     {fmtF(p.price)}
-                    {margin > 0 && <span className="text-mint"> · marge {fmt(margin)}{sym()}</span>}
+                    {margin > 0 && !isStaff && <span className="text-mint"> · marge {fmt(margin)}{sym()}</span>}
                   </p>
                 </div>
                 <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-extrabold tabular-nums ${lv.chip}`}>
@@ -436,7 +441,7 @@ export default function Stock() {
           )}
         </div>
 
-        {sellers.length > 0 && (
+        {sellers.length > 0 && !isStaff && (
           <fieldset className="mb-4">
             <legend className="mb-2 text-xs font-bold text-muted">Encaissé par</legend>
             <div className="flex flex-wrap gap-2">

@@ -10,6 +10,7 @@ import { clearPending, getPending, recheckLicense, verifyPayment } from "./lib/p
 import { longDate } from "./lib/format";
 import Dashboard from "./components/Dashboard";
 import AddTxn from "./components/AddTxn";
+import StaffHome from "./components/StaffHome";
 
 /* Écrans chargés à la demande : l'app démarre plus vite en 3G */
 const Landing = lazy(() => import("./components/Landing"));
@@ -40,7 +41,7 @@ import BottomNav, { type Tab } from "./components/BottomNav";
 import { Toast } from "./components/ui";
 
 function AppShell() {
-  const { profile, deleteTxn, updateProfile, setPlan } = useStore();
+  const { profile, deleteTxn, updateProfile, setPlan, isStaff } = useStore();
   const [premiumStep, setPremiumStep] = useState<"plans" | "success">("plans");
   const toastTimer = useRef<number | undefined>(undefined);
   const [tab, setTab] = useState<Tab>("home");
@@ -144,6 +145,30 @@ function AppShell() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /* Un vendeur ne voit ni les rapports ni les réglages */
+  useEffect(() => {
+    if (isStaff && (tab === "reports" || tab === "settings")) setTab("home");
+  }, [isStaff, tab]);
+
+  /* Verrouillage automatique : 5 min sans geste pour le patron, 30 min pour un vendeur */
+  useEffect(() => {
+    if (!profile?.pin || locked) return;
+    const limit = (isStaff ? 30 : 5) * 60_000;
+    let last = Date.now();
+    const touch = () => {
+      last = Date.now();
+    };
+    const evs = ["pointerdown", "keydown"] as const;
+    evs.forEach((e) => window.addEventListener(e, touch, { passive: true }));
+    const id = window.setInterval(() => {
+      if (Date.now() - last > limit) setLocked(true);
+    }, 15_000);
+    return () => {
+      evs.forEach((e) => window.removeEventListener(e, touch));
+      window.clearInterval(id);
+    };
+  }, [profile?.pin, locked, isStaff]);
+
   useEffect(() => {
     const secureResume = () => {
       if (profile?.pin) setLocked(true);
@@ -165,9 +190,9 @@ function AppShell() {
 
   const undo = () => {
     if (!toast?.undoId) return;
-    deleteTxn(toast.undoId);
+    const ok = deleteTxn(toast.undoId);
     if (navigator.vibrate) navigator.vibrate(8);
-    showToast({ msg: "Saisie annulée", kind: "info" }, 1800);
+    showToast({ msg: ok ? "Saisie annulée" : "Annulation refusée : demande au patron", kind: "info" }, 2400);
   };
 
   return (
@@ -185,23 +210,28 @@ function AppShell() {
             transition={{ duration: 0.22, ease: "easeOut" }}
           >
             <Suspense fallback={<ScreenLoader />}>
-            {tab === "home" && <Dashboard onPremium={() => setPremiumOpen(true)} onSettings={() => setTab("settings")} />}
+            {tab === "home" &&
+              (isStaff ? (
+                <StaffHome onLock={() => setLocked(true)} />
+              ) : (
+                <Dashboard onPremium={() => setPremiumOpen(true)} onSettings={() => setTab("settings")} />
+              ))}
             {tab === "stock" && <Stock />}
             {tab === "debts" && <Debts onPremium={() => setPremiumOpen(true)} />}
-            {tab === "reports" && <Reports onPremium={() => setPremiumOpen(true)} />}
-            {tab === "settings" && <Settings onPremium={() => setPremiumOpen(true)} onBack={() => setTab("home")} />}
+            {tab === "reports" && !isStaff && <Reports onPremium={() => setPremiumOpen(true)} />}
+            {tab === "settings" && !isStaff && <Settings onPremium={() => setPremiumOpen(true)} onBack={() => setTab("home")} />}
             </Suspense>
           </motion.div>
         </AnimatePresence>
       </main>
 
-      <BottomNav tab={tab} onTab={setTab} onAdd={() => setAddOpen(true)} />
+      <BottomNav tab={tab} onTab={setTab} onAdd={() => setAddOpen(true)} staffMode={isStaff} onLock={() => setLocked(true)} />
 
       <AddTxn open={addOpen} onClose={() => setAddOpen(false)} onSaved={onSaved} />
 
       <Suspense fallback={null}>
         <AnimatePresence>
-          {premiumOpen && (
+          {premiumOpen && !isStaff && (
             <Premium
               initialStep={premiumStep}
               onClose={() => {

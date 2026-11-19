@@ -1,5 +1,22 @@
 # Ivory Caisse — Journal des changements
 
+## 2.8.0 — patron et vendeurs
+
+- Rôles : le patron a son PIN et tous les droits ; chaque vendeur a son propre PIN, créé et retiré par le patron.
+- Le vendeur encaisse (articles du stock ou montant libre), voit les quantités, note des crédits clients.
+  Il ne voit ni marges, ni prix d'achat, ni valeur du stock, ni rapports, ni réglages.
+  Il ne peut pas modifier un mouvement, un produit ou le stock, ni supprimer une fiche client.
+- Annulation par le vendeur : seulement sa propre saisie, dans les 2 minutes, 3 fois par jour. Au-delà : PIN du patron.
+- Dépense du vendeur : seule jusqu'à 5 000 F (marquée « à vérifier »), au-delà le patron valide avec son PIN.
+- Règles réglables par le patron (plafond, délai, nombre d'annulations).
+- Journal de tout : qui, quand, quoi (ventes, annulations, dépenses, stock, prix, équipe, tentatives refusées, mauvais PIN).
+- Clôture de caisse du vendeur : attendu, espèces + Mobile Money comptés, écart justifié, envoi au patron par WhatsApp.
+- Carte « Contrôle de l'équipe » sur l'accueil du patron ; écran Journal / Clôtures / À vérifier.
+- PIN trop simples refusés (1234, 0000, 1212…). Verrouillage auto : 5 min (patron), 30 min (vendeur).
+- PIN patron oublié : récupération avec la clé de licence ou le code de secours. Plus de « réinitialiser l'app »
+  depuis l'écran verrouillé quand une équipe existe (un vendeur ne peut plus tout effacer).
+- Gratuit : 1 vendeur et 7 jours de journal. Premium : vendeurs illimités, journal complet.
+
 ## 2.7.0 — application Android
 
 - L'app native (APK) appelle le serveur en ligne pour les licences et paiements ; le serveur accepte ces appels (CORS).

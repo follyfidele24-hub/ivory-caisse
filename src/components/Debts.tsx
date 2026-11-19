@@ -96,7 +96,7 @@ function RelanceCard({
 }
 
 export default function Debts({ onPremium }: { onPremium: () => void }) {
-  const { debts, profile, addClient, addDebtMove, removeClient, markReminded } = useStore();
+  const { debts, profile, addClient, addDebtMove, removeClient, markReminded, isStaff } = useStore();
   const [dir, setDir] = useState<DebtDir>("credit");
   const [selected, setSelected] = useState<string | null>(null);
   const [sheetClient, setSheetClient] = useState(false);
@@ -462,6 +462,7 @@ export default function Debts({ onPremium }: { onPremium: () => void }) {
               {history.length === 0 && <p className="p-8 text-center text-sm text-muted">Aucun mouvement pour l'instant.</p>}
             </div>
 
+            {!isStaff && (
             <button
               onClick={() => {
                 removeClient(client.id);
@@ -472,6 +473,7 @@ export default function Debts({ onPremium }: { onPremium: () => void }) {
             >
               <Trash2 size={15} /> Supprimer cette fiche
             </button>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

@@ -3,6 +3,7 @@ import { Bus, Check, Coins, Delete, Home, Minus, MoreHorizontal, Package, Plus, 
 import { fmtF } from "../lib/format";
 import { useStore, type Product, type TxnType } from "../lib/store";
 import { Btn, Seg, Sheet } from "./ui";
+import { OwnerPinSheet } from "./PinPad";
 
 /* ---------- Clavier numérique partagé ---------- */
 
@@ -151,7 +152,8 @@ export default function AddTxn({
   onClose: () => void;
   onSaved: (kind: TxnType, amount: number, id: string) => void;
 }) {
-  const { addTxn, sellers, products, sellCart, restock } = useStore();
+  const { addTxn, sellers, products, sellCart, restock, isStaff, rules } = useStore();
+  const [askOwner, setAskOwner] = useState(false);
   const [type, setType] = useState<TxnType>("sale");
   const [amount, setAmount] = useState("");
   const [cat, setCat] = useState("Marchandises");
@@ -165,7 +167,7 @@ export default function AddTxn({
 
   const hasProducts = products.length > 0;
   const fromStock = type === "sale" && hasProducts && saleMode === "stock";
-  const restocking = type === "expense" && cat === "Marchandises" && pid !== null;
+  const restocking = !isStaff && type === "expense" && cat === "Marchandises" && pid !== null;
   const picked = products.find((p) => p.id === pid) ?? null;
 
   const typed = parseInt(amount || "0", 10);
@@ -207,8 +209,15 @@ export default function AddTxn({
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  const save = () => {
+  const overCap = isStaff && type === "expense" && value > rules.expenseCap;
+
+  const save = (ownerPin?: string) => {
     if (!valid) return;
+    /* Dépense d'un vendeur au-delà du plafond : le patron valide avec son PIN */
+    if (overCap && !ownerPin) {
+      setAskOwner(true);
+      return;
+    }
     let id: string | null;
     if (fromStock && picked) id = sellCart([{ id: picked.id, qty }], seller ?? undefined);
     else if (restocking && picked) id = restock(picked.id, qty, value, note.trim());
@@ -220,7 +229,7 @@ export default function AddTxn({
         note: note.trim(),
         ts: Date.now(),
         seller: type === "sale" ? seller ?? undefined : undefined,
-      });
+      }, { ownerPin });
     if (!id) return;
     if (navigator.vibrate) navigator.vibrate([10, 40, 20]);
     onSaved(type, value, id);
@@ -237,6 +246,7 @@ export default function AddTxn({
   saveRef.current = save;
 
   return (
+    <>
     <Sheet open={open} onClose={onClose}>
       <Seg
         id="txn-type"
@@ -283,6 +293,9 @@ export default function AddTxn({
             {qty} × {fmtF(picked.price)}
           </p>
         )}
+        {overCap && (
+          <p className="mt-1 text-xs font-bold text-amber-600">Au-delà de {fmtF(rules.expenseCap)} : le patron valide avec son PIN.</p>
+        )}
         {restocking && picked && value > 0 && (
           <p className="mt-1 text-xs font-semibold text-muted tabular-nums">
             soit {fmtF(Math.round(value / qty))} l'unité · stock {picked.stock} → {picked.stock + qty}
@@ -315,7 +328,7 @@ export default function AddTxn({
       )}
 
       {/* Qui encaisse ? (mode équipe) */}
-      {type === "sale" && sellers.length > 0 && (
+      {type === "sale" && sellers.length > 0 && !isStaff && (
         <div className="mb-4">
           <p className="mb-2 flex items-center gap-1.5 text-xs font-bold text-muted">
             <User size={12} /> Encaissé par
@@ -356,7 +369,7 @@ export default function AddTxn({
         </div>
       )}
 
-      {type === "expense" && cat === "Marchandises" && hasProducts && (
+      {type === "expense" && cat === "Marchandises" && hasProducts && !isStaff && (
         <div>
           <p className="mb-2 text-xs font-bold text-muted">
             Ajouter au stock <span className="font-semibold">(facultatif · touche à nouveau pour annuler)</span>
@@ -380,7 +393,7 @@ export default function AddTxn({
       {!fromStock && <AmountPad value={amount} onChange={setAmount} />}
 
       <Btn
-        onClick={save}
+        onClick={() => save()}
         disabled={!valid}
         variant={type === "sale" ? "mint" : "danger"}
         className={`mt-4 w-full py-4 text-base ${!valid ? "opacity-40" : ""}`}
@@ -393,5 +406,16 @@ export default function AddTxn({
           : `${restocking ? "Acheter" : "Dépenser"} ${value > 0 ? fmtF(value) : ""}`}
       </Btn>
     </Sheet>
+      <OwnerPinSheet
+        open={askOwner}
+        title="Validation du patron"
+        detail={`Dépense de ${fmtF(value)} : au-delà de ${fmtF(rules.expenseCap)}, le patron doit valider.`}
+        onClose={() => setAskOwner(false)}
+        onOk={(pin) => {
+          setAskOwner(false);
+          save(pin);
+        }}
+      />
+    </>
   );
 }

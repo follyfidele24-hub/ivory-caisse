@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { BarChart3, LayoutDashboard, Package, Plus, Users } from "lucide-react";
+import { BarChart3, LayoutDashboard, LogOut, Package, Plus, Users } from "lucide-react";
 
 export type Tab = "home" | "stock" | "debts" | "reports" | "settings";
 
@@ -14,10 +14,15 @@ export default function BottomNav({
   tab,
   onTab,
   onAdd,
+  staffMode = false,
+  onLock,
 }: {
   tab: Tab;
   onTab: (t: Tab) => void;
   onAdd: () => void;
+  /** Vendeur connecté : pas d'onglet Rapports, un bouton Quitter à la place */
+  staffMode?: boolean;
+  onLock?: () => void;
 }) {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md">
@@ -42,9 +47,16 @@ export default function BottomNav({
             </motion.button>
           </div>
 
-          {ITEMS.slice(2).map((it) => (
-            <NavButton key={it.id} item={it} active={tab === it.id} onClick={() => onTab(it.id)} />
-          ))}
+          {ITEMS.slice(2).map((it) =>
+            staffMode && it.id === "reports" ? (
+              <button key="lock" onClick={onLock} className="tap relative flex w-20 flex-col items-center gap-1 py-2" aria-label="Quitter et verrouiller">
+                <LogOut size={20} className="text-muted" aria-hidden="true" />
+                <span className="text-[10px] font-bold text-muted">Quitter</span>
+              </button>
+            ) : (
+              <NavButton key={it.id} item={it} active={tab === it.id} onClick={() => onTab(it.id)} />
+            ),
+          )}
         </div>
       </div>
     </nav>

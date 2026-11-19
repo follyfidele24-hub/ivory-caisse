@@ -16,6 +16,10 @@ export interface Txn {
   items?: TxnItem[];
   /** Date de dernière modification */
   edited?: number;
+  /** Membre de l'équipe qui a saisi le mouvement (vide = le patron) */
+  by?: string;
+  /** Dépense saisie par un vendeur, en attente du contrôle du patron */
+  review?: "pending" | "ok";
 }
 
 export interface TxnItem {
@@ -34,6 +38,8 @@ export interface DebtMove {
   amount: number;
   note: string;
   ts: number;
+  /** Membre de l'équipe qui a noté le mouvement (vide = le patron) */
+  by?: string;
 }
 
 export type DebtDir = "credit" | "debt";
@@ -94,6 +100,101 @@ export interface Profile {
   demo?: boolean;
   /** Reçu personnalisé (Premium) */
   receipt?: { city?: string; phone?: string; thanks?: string };
+  /** Code de secours du patron (récupère le PIN sans la clé de licence) */
+  recovery?: string;
+}
+
+/* ---------- Équipe, droits et contrôle ---------- */
+
+/** Accès d'un vendeur : un prénom et son propre code PIN */
+export interface StaffAccess {
+  name: string;
+  pin: string;
+  active: boolean;
+  created: number;
+}
+
+/** Règles fixées par le patron */
+export interface Rules {
+  /** Dépense maximale qu'un vendeur saisit seul */
+  expenseCap: number;
+  /** Délai (minutes) pendant lequel un vendeur peut annuler sa propre vente */
+  cancelMin: number;
+  /** Nombre d'annulations par jour et par vendeur sans le patron */
+  cancelPerDay: number;
+}
+export const DEFAULT_RULES: Rules = { expenseCap: 5000, cancelMin: 2, cancelPerDay: 3 };
+
+export type JournalAction =
+  | "login" | "sale" | "expense" | "cancel" | "delete" | "edit" | "stock" | "product"
+  | "debt" | "team" | "rules" | "closure" | "review" | "pin" | "denied" | "data";
+
+/** Une ligne du journal : qui, quand, quoi. Ajout seulement, jamais modifiée. */
+export interface JournalEntry {
+  id: string;
+  ts: number;
+  who: string;
+  staff: boolean;
+  action: JournalAction;
+  text: string;
+  amount?: number;
+}
+
+/** Clôture de caisse d'une personne : ce qui était attendu, ce qui a été compté */
+export interface Closure {
+  id: string;
+  ts: number;
+  who: string;
+  staff: boolean;
+  from: number;
+  expected: number;
+  cash: number;
+  momo: number;
+  diff: number;
+  note: string;
+}
+
+export const OWNER = "Patron";
+export const JOURNAL_MAX = 5000;
+
+/** PIN trop facile à deviner : chiffres identiques, suites, motifs répétés */
+export function weakPin(pin: string): boolean {
+  if (!/^\d{4}$/.test(pin)) return true;
+  if (/^(\d)\1{3}$/.test(pin)) return true;
+  const d = pin.split("").map(Number);
+  const up = d.every((x, i) => i === 0 || x === d[i - 1] + 1);
+  const down = d.every((x, i) => i === 0 || x === d[i - 1] - 1);
+  if (up || down) return true;
+  if (pin[0] === pin[2] && pin[1] === pin[3]) return true;
+  return ["1122", "2580", "0852", "1004", "2000", "2001", "1999"].includes(pin);
+}
+
+/** Ce qu'un vendeur reste autorisé à annuler aujourd'hui */
+export function cancelStatus(txn: Txn, who: string, journal: JournalEntry[], rules: Rules, now = Date.now()) {
+  const mine = (txn.by ?? txn.seller) === who;
+  const inTime = now - txn.ts <= rules.cancelMin * 60_000;
+  const start = startOfDay(now);
+  const used = journal.filter((j) => j.staff && j.who === who && j.action === "cancel" && j.ts >= start).length;
+  const left = Math.max(0, rules.cancelPerDay - used);
+  return { ok: mine && inTime && left > 0, mine, inTime, left };
+}
+
+/** Argent qu'une personne doit avoir en main depuis une date */
+export function expectedCash(txns: Txn[], debts: Debt[], who: string | null, from: number, to = Date.now()) {
+  const me = (x?: string) => (who === null ? !x : x === who);
+  let sales = 0, expenses = 0, collected = 0, paidOut = 0;
+  for (const t of txns) {
+    if (t.ts < from || t.ts > to || !me(t.by ?? t.seller)) continue;
+    if (t.type === "sale") sales += t.amount;
+    else expenses += t.amount;
+  }
+  for (const d of debts)
+    for (const m of d.payments)
+      if (m.ts >= from && m.ts <= to && me(m.by)) {
+        if ((d.dir ?? "credit") === "credit") collected += m.amount;
+        else paidOut += m.amount;
+      }
+  return { sales, expenses, collected, paidOut, expected: sales - expenses + collected - paidOut };
 }
 
 export const PLAN_LABEL: Record<Plan, string> = {
@@ -137,6 +238,8 @@ export function totals(txns: Txn[], from: number, to: number) {
   return { sales, expenses, profit: sales - expenses };
 }
 
+type Res = { ok: true } | { ok: false; why: string };
+
 interface StoreShape {
   launched: boolean;
   markLaunched: () => void;
@@ -145,9 +248,40 @@ interface StoreShape {
   debts: Debt[];
   products: Product[];
   sellers: string[];
+  /* ---- équipe et contrôle ---- */
+  staff: StaffAccess[];
+  journal: JournalEntry[];
+  closures: Closure[];
+  rules: Rules;
+  /** Les rôles sont actifs : PIN patron + au moins un accès vendeur */
+  rolesOn: boolean;
+  /** Personne connectée (null = le patron) */
+  actor: string | null;
+  /** true si un vendeur est aux commandes : droits réduits */
+  isStaff: boolean;
+  /** Nom affiché de la personne connectée */
+  actorName: string;
+  login: (who: string | null, pin: string) => boolean;
+  logout: () => void;
+  checkOwnerPin: (pin: string) => boolean;
+  /** Note au journal une tentative refusée (ex. mauvais PIN patron tapé sur le téléphone d'un vendeur) */
+  logDenied: (text: string) => void;
+  addStaff: (name: string, pin: string) => Res;
+  setStaffPin: (name: string, pin: string) => Res;
+  setStaffActive: (name: string, active: boolean) => void;
+  removeStaff: (name: string) => void;
+  setRules: (r: Rules) => void;
+  addClosure: (c: Omit<Closure, "id" | "ts" | "who" | "staff">) => void;
+  markReviewed: (id: string) => void;
+  /** Nouveau PIN patron avec la clé de licence ou le code de secours */
+  recoverOwner: (secret: string, newPin: string) => Res;
+  ensureRecovery: () => string;
+  /* ---- mouvements ---- */
   completeOnboarding: (name: string, shop: string, currency: string) => void;
-  addTxn: (t: Omit<Txn, "id">) => string;
-  deleteTxn: (id: string) => void;
+  /** Renvoie l'id créé, ou "" si refusé (dépense vendeur au-delà du plafond sans PIN patron) */
+  addTxn: (t: Omit<Txn, "id">, opts?: { ownerPin?: string }) => string;
+  /** false si un vendeur n'a pas le droit d'annuler ce mouvement */
+  deleteTxn: (id: string, opts?: { ownerPin?: string }) => boolean;
   updateTxn: (id: string, patch: Partial<Omit<Txn, "id">>) => void;
   sellCart: (items: { id: string; qty: number }[], seller?: string) => string | null;
   /** Achat de marchandises : crée la dépense et remet les quantités en stock */
@@ -170,6 +304,7 @@ interface StoreShape {
 }
 
 const KEY = "ivorycaisse_v4";
+const ACTOR_KEY = "ivorycaisse_actor";
 
 interface Persisted {
   launched: boolean;
@@ -178,7 +313,16 @@ interface Persisted {
   debts: Debt[];
   products: Product[];
   sellers: string[];
+  staff: StaffAccess[];
+  journal: JournalEntry[];
+  closures: Closure[];
+  rules: Rules;
 }
+
+const EMPTY: Persisted = {
+  launched: false, profile: null, txns: [], debts: [], products: [], sellers: [],
+  staff: [], journal: [], closures: [], rules: DEFAULT_RULES,
+};
 
 const load = (): Persisted => {
   try {
@@ -192,13 +336,27 @@ const load = (): Persisted => {
         debts: p.debts ?? [],
         products: p.products ?? [],
         sellers: p.sellers ?? [],
+        staff: p.staff ?? [],
+        journal: p.journal ?? [],
+        closures: p.closures ?? [],
+        rules: { ...DEFAULT_RULES, ...(p.rules ?? {}) },
       };
     }
   } catch {
     /* ignore */
   }
-  return { launched: false, profile: null, txns: [], debts: [], products: [], sellers: [] };
+  return EMPTY;
 };
+
+const loadActor = (): string | null => {
+  try {
+    return localStorage.getItem(ACTOR_KEY) || null;
+  } catch {
+    return null;
+  }
+};
+
+const money = (n: number) => `${Math.round(n).toLocaleString("fr-FR").replace(/\u202F/g, " ")} F`;
 
 /* ---------- Migration douce depuis l'ancienne clé ---------- */
 (() => {
@@ -319,6 +477,7 @@ const StoreCtx = createContext<StoreShape | null>(null);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<Persisted>(load);
+  const [actor, setActorRaw] = useState<string | null>(loadActor);
 
   useEffect(() => {
     try {
@@ -328,14 +487,158 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, [state]);
 
-  const api = useMemo<StoreShape>(
-    () => ({
+  const setActor = (a: string | null) => {
+    setActorRaw(a);
+    try {
+      if (a) localStorage.setItem(ACTOR_KEY, a);
+      else localStorage.removeItem(ACTOR_KEY);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const rolesOn = Boolean(state.profile?.pin) && state.staff.some((x) => x.active);
+  /* Un nom de vendeur retiré ou désactivé ne garde aucun droit */
+  const isStaff = rolesOn && actor !== null && state.staff.some((x) => x.name === actor && x.active);
+  const who = isStaff ? actor! : OWNER;
+
+  const api = useMemo<StoreShape>(() => {
+    /** Ajoute une ligne au journal (append-only, plafonné aux JOURNAL_MAX dernières) */
+    const log = (s: Persisted, action: JournalAction, text: string, amount?: number): JournalEntry[] => {
+      const e: JournalEntry = { id: uid(), ts: Date.now(), who, staff: isStaff, action, text, amount };
+      const j = [e, ...s.journal];
+      return j.length > JOURNAL_MAX ? j.slice(0, JOURNAL_MAX) : j;
+    };
+    const ownerOk = (pin?: string) => Boolean(pin && state.profile?.pin && pin === state.profile.pin);
+    const denied = (text: string) => setState((s) => ({ ...s, journal: log(s, "denied", text) }));
+    /** Les actions du patron seulement : un vendeur est refusé et la tentative est notée */
+    const ownerOnly = (label: string, fn: () => void) => {
+      if (isStaff) {
+        denied(`Tentative refusée : ${label}`);
+        return;
+      }
+      fn();
+    };
+    const nameOf = (s: Persisted, pid: string) => s.products.find((p) => p.id === pid)?.name ?? "article";
+
+    return {
       launched: state.launched,
       profile: state.profile,
       txns: state.txns,
       debts: state.debts,
       products: state.products,
       sellers: state.sellers,
+      staff: state.staff,
+      journal: state.journal,
+      closures: state.closures,
+      rules: state.rules,
+      rolesOn,
+      actor: isStaff ? actor : null,
+      isStaff,
+      actorName: isStaff ? actor! : state.profile?.name?.split(" ")[0] || OWNER,
+
+      login: (target, pin) => {
+        if (target === null) {
+          if (pin !== state.profile?.pin) return false;
+          setActor(null);
+          setState((s) => ({ ...s, journal: [{ id: uid(), ts: Date.now(), who: OWNER, staff: false, action: "login", text: "Connexion du patron" }, ...s.journal] }));
+          return true;
+        }
+        const st = state.staff.find((x) => x.name === target && x.active);
+        if (!st || st.pin !== pin) return false;
+        setActor(target);
+        setState((s) => ({ ...s, journal: [{ id: uid(), ts: Date.now(), who: target, staff: true, action: "login", text: `Connexion de ${target}` }, ...s.journal] }));
+        return true;
+      },
+      logout: () => setActor(null),
+      checkOwnerPin: (pin) => ownerOk(pin),
+      logDenied: (text) => denied(text),
+
+      addStaff: (name, pin) => {
+        if (isStaff) return { ok: false, why: "Réservé au patron" };
+        const n = name.trim();
+        if (n.length < 2) return { ok: false, why: "Prénom trop court" };
+        if (n.toLowerCase() === OWNER.toLowerCase()) return { ok: false, why: "Choisis un autre prénom" };
+        if (!state.profile?.pin) return { ok: false, why: "Crée d'abord ton PIN patron" };
+        if (state.staff.some((x) => x.name.toLowerCase() === n.toLowerCase())) return { ok: false, why: "Ce prénom a déjà un accès" };
+        if (weakPin(pin)) return { ok: false, why: "PIN trop simple (évite 1234, 0000, 1212…)" };
+        if (pin === state.profile.pin || state.staff.some((x) => x.pin === pin)) return { ok: false, why: "Ce PIN est déjà utilisé" };
+        setState((s) => ({
+          ...s,
+          staff: [...s.staff, { name: n, pin, active: true, created: Date.now() }],
+          sellers: s.sellers.includes(n) ? s.sellers : [...s.sellers, n],
+          journal: log(s, "team", `Accès vendeur créé pour ${n}`),
+        }));
+        return { ok: true };
+      },
+      setStaffPin: (name, pin) => {
+        if (isStaff) return { ok: false, why: "Réservé au patron" };
+        if (weakPin(pin)) return { ok: false, why: "PIN trop simple (évite 1234, 0000, 1212…)" };
+        if (pin === state.profile?.pin || state.staff.some((x) => x.name !== name && x.pin === pin)) return { ok: false, why: "Ce PIN est déjà utilisé" };
+        setState((s) => ({ ...s, staff: s.staff.map((x) => (x.name === name ? { ...x, pin } : x)), journal: log(s, "pin", `Nouveau PIN pour ${name}`) }));
+        return { ok: true };
+      },
+      setStaffActive: (name, active) =>
+        ownerOnly("suspendre un accès", () =>
+          setState((s) => ({ ...s, staff: s.staff.map((x) => (x.name === name ? { ...x, active } : x)), journal: log(s, "team", `${active ? "Accès réactivé" : "Accès suspendu"} : ${name}`) })),
+        ),
+      removeStaff: (name) =>
+        ownerOnly("retirer un accès", () =>
+          setState((s) => ({ ...s, staff: s.staff.filter((x) => x.name !== name), journal: log(s, "team", `Accès retiré : ${name}`) })),
+        ),
+      setRules: (r) =>
+        ownerOnly("changer les règles", () =>
+          setState((s) => ({
+            ...s,
+            rules: r,
+            journal: log(s, "rules", `Règles : dépense seule ≤ ${money(r.expenseCap)}, annulation ${r.cancelMin} min, ${r.cancelPerDay}/jour`),
+          })),
+        ),
+      addClosure: (c) =>
+        setState((s) => ({
+          ...s,
+          closures: [{ ...c, id: uid(), ts: Date.now(), who, staff: isStaff }, ...s.closures].slice(0, 1000),
+          journal: log(
+            s,
+            "closure",
+            `Clôture de caisse : attendu ${money(c.expected)}, compté ${money(c.cash + c.momo)}, ${c.diff === 0 ? "caisse juste" : c.diff < 0 ? `manque ${money(-c.diff)}` : `surplus ${money(c.diff)}`}`,
+            c.diff,
+          ),
+        })),
+      markReviewed: (id) =>
+        ownerOnly("valider une dépense", () =>
+          setState((s) => {
+            const t = s.txns.find((x) => x.id === id);
+            return { ...s, txns: s.txns.map((x) => (x.id === id ? { ...x, review: "ok" as const } : x)), journal: t ? log(s, "review", `Dépense vérifiée : ${t.note || t.category} (${t.by ?? "?"})`, t.amount) : s.journal };
+          }),
+        ),
+      recoverOwner: (secret, newPin) => {
+        const sec = secret.trim().toUpperCase();
+        const prof = state.profile;
+        if (!prof) return { ok: false, why: "Aucune boutique" };
+        const good = (prof.licenseKey && sec === prof.licenseKey.trim().toUpperCase()) || (prof.recovery && sec === prof.recovery);
+        if (!good) return { ok: false, why: "Clé ou code de secours incorrect" };
+        if (weakPin(newPin)) return { ok: false, why: "PIN trop simple" };
+        if (state.staff.some((x) => x.pin === newPin)) return { ok: false, why: "Ce PIN est déjà utilisé par un vendeur" };
+        setActor(null);
+        setState((s) => ({
+          ...s,
+          profile: s.profile ? { ...s.profile, pin: newPin } : s.profile,
+          journal: [{ id: uid(), ts: Date.now(), who: OWNER, staff: false, action: "pin", text: "PIN patron réinitialisé (clé de secours)" }, ...s.journal],
+        }));
+        return { ok: true };
+      },
+      ensureRecovery: () => {
+        if (state.profile?.recovery) return state.profile.recovery;
+        const abc = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        const buf = new Uint32Array(8);
+        crypto.getRandomValues(buf);
+        const code = Array.from(buf, (n) => abc[n % abc.length]).join("");
+        const pretty = `${code.slice(0, 4)}-${code.slice(4)}`;
+        setState((s) => (s.profile ? { ...s, profile: { ...s.profile, recovery: pretty } } : s));
+        return pretty;
+      },
+
       markLaunched: () => setState((s) => ({ ...s, launched: true })),
       completeOnboarding: (name, shop, currency) =>
         setState((s) => ({
@@ -347,36 +650,74 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           products: seedProducts(),
           sellers: [SEED_SELLER],
         })),
-      addTxn: (t) => {
+      addTxn: (t, opts) => {
+        let review: Txn["review"];
+        if (isStaff && t.type === "expense") {
+          if (t.amount > state.rules.expenseCap && !ownerOk(opts?.ownerPin)) {
+            denied(`Dépense de ${money(t.amount)} refusée (plafond ${money(state.rules.expenseCap)})`);
+            return "";
+          }
+          review = ownerOk(opts?.ownerPin) ? "ok" : "pending";
+        }
         const id = uid();
-        setState((s) => ({ ...s, txns: [{ ...t, id }, ...s.txns] }));
+        const row: Txn = isStaff
+          ? { ...t, id, by: actor!, seller: t.type === "sale" ? actor! : undefined, review }
+          : { ...t, id };
+        setState((s) => ({
+          ...s,
+          txns: [row, ...s.txns],
+          journal: log(s, row.type === "sale" ? "sale" : "expense", `${row.type === "sale" ? "Vente" : "Dépense"} : ${row.note || row.category}${review === "ok" ? " (validée par le patron)" : ""}`, row.amount),
+        }));
         return id;
       },
-      deleteTxn: (id) =>
+      deleteTxn: (id, opts) => {
+        const t = state.txns.find((x) => x.id === id);
+        if (!t) return false;
+        const override = ownerOk(opts?.ownerPin);
+        if (isStaff && !override) {
+          const st = cancelStatus(t, actor!, state.journal, state.rules);
+          if (!st.ok) {
+            denied(`Annulation refusée : ${t.note || t.category} (${money(t.amount)})`);
+            return false;
+          }
+        }
         setState((s) => {
-          const t = s.txns.find((x) => x.id === id);
+          const tt = s.txns.find((x) => x.id === id);
+          if (!tt) return s;
           /* Supprimer une vente remet les articles en rayon ; supprimer un achat les retire */
-          const sign = t?.type === "expense" ? -1 : 1;
+          const sign = tt.type === "expense" ? -1 : 1;
           const back = new Map<string, number>();
-          t?.items?.forEach((it) => it.productId && back.set(it.productId, (back.get(it.productId) ?? 0) + it.qty));
+          tt.items?.forEach((it) => it.productId && back.set(it.productId, (back.get(it.productId) ?? 0) + it.qty));
+          const label = `${tt.type === "sale" ? "vente" : "dépense"} « ${tt.note || tt.category} » du ${new Date(tt.ts).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}`;
           return {
             ...s,
             txns: s.txns.filter((x) => x.id !== id),
             products: back.size
               ? s.products.map((p) => (back.has(p.id) ? { ...p, stock: Math.max(0, p.stock + sign * back.get(p.id)!) } : p))
               : s.products,
+            journal: log(s, isStaff ? "cancel" : "delete", `${isStaff ? "Annulation" : "Suppression"} : ${label}${isStaff && override ? " (PIN patron)" : ""}`, tt.amount),
           };
-        }),
+        });
+        return true;
+      },
       updateTxn: (id, patch) =>
-        setState((s) => ({
-          ...s,
-          txns: s.txns.map((t) => (t.id === id ? { ...t, ...patch, edited: Date.now() } : t)).sort((a, b) => b.ts - a.ts),
-        })),
+        ownerOnly("modifier un mouvement", () =>
+          setState((s) => {
+            const old = s.txns.find((t) => t.id === id);
+            const changed = old && patch.amount !== undefined && patch.amount !== old.amount ? ` ${money(old.amount)} → ${money(patch.amount)}` : "";
+            return {
+              ...s,
+              txns: s.txns.map((t) => (t.id === id ? { ...t, ...patch, edited: Date.now() } : t)).sort((a, b) => b.ts - a.ts),
+              journal: old ? log(s, "edit", `Modification : ${old.note || old.category}${changed}`, patch.amount ?? old.amount) : s.journal,
+            };
+          }),
+        ),
       sellCart: (items, seller) => {
         /* Contrôle immédiat : rien à encaisser si aucun article demandé n'est disponible */
         const sellable = items.some((it) => it.qty > 0 && (state.products.find((p) => p.id === it.id)?.stock ?? 0) > 0);
         if (!sellable) return null;
         const id = uid();
+        const by = isStaff ? actor! : undefined;
         setState((s) => {
           const lines: TxnItem[] = [];
           for (const it of items) {
@@ -393,7 +734,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             category: "Vente",
             note: valid.map((l) => `${l.name} ×${l.qty}`).join(", "),
             ts: Date.now(),
-            seller,
+            seller: by ?? seller,
+            by,
             items: valid,
           };
           const dec = new Map(valid.map((l) => [l.productId!, l.qty]));
@@ -401,6 +743,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             ...s,
             products: s.products.map((p) => (dec.has(p.id) ? { ...p, stock: Math.max(0, p.stock - dec.get(p.id)!) } : p)),
             txns: [txn, ...s.txns],
+            journal: log(s, "sale", `Vente : ${txn.note}`, txn.amount),
           };
         });
         return id;
@@ -408,6 +751,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       restock: (productId, qty, amount, note) => {
         const p0 = state.products.find((p) => p.id === productId);
         if (!p0 || qty <= 0 || amount < 0) return null;
+        if (isStaff) {
+          denied(`Tentative refusée : réassort de ${p0.name}`);
+          return null;
+        }
         const id = uid();
         setState((s) => {
           const p = s.products.find((x) => x.id === productId);
@@ -427,6 +774,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             /* Le prix d'achat suit le dernier réassort : la marge reste juste */
             products: s.products.map((x) => (x.id === productId ? { ...x, stock: x.stock + qty, cost: unit } : x)),
             txns: [txn, ...s.txns],
+            journal: log(s, "stock", `Réassort : ${p.name} +${qty} (stock ${p.stock} → ${p.stock + qty})`, amount),
           };
         });
         return id;
@@ -434,29 +782,59 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       addClient: (name, phone, dir = "credit") =>
         setState((s) => {
           const c: Debt = { id: uid(), name, phone, dir, entries: [], payments: [], created: Date.now() };
-          return { ...s, debts: [c, ...s.debts] };
+          return { ...s, debts: [c, ...s.debts], journal: log(s, "debt", `Nouvelle fiche ${dir === "credit" ? "client" : "fournisseur"} : ${name}`) };
         }),
       addDebtMove: (debtId, kind, amount, note) =>
-        setState((s) => ({
-          ...s,
-          debts: s.debts.map((d) => {
-            if (d.id !== debtId) return d;
-            const move: DebtMove = { id: uid(), amount, note, ts: Date.now() };
-            return kind === "entry" ? { ...d, entries: [move, ...d.entries] } : { ...d, payments: [move, ...d.payments] };
+        setState((s) => {
+          const d0 = s.debts.find((d) => d.id === debtId);
+          return {
+            ...s,
+            debts: s.debts.map((d) => {
+              if (d.id !== debtId) return d;
+              const move: DebtMove = { id: uid(), amount, note, ts: Date.now(), by: isStaff ? actor! : undefined };
+              return kind === "entry" ? { ...d, entries: [move, ...d.entries] } : { ...d, payments: [move, ...d.payments] };
+            }),
+            journal: d0 ? log(s, "debt", `${kind === "entry" ? "Crédit ajouté" : "Remboursement reçu"} : ${d0.name}${note ? ` (${note})` : ""}`, amount) : s.journal,
+          };
+        }),
+      removeClient: (id) =>
+        ownerOnly("supprimer une fiche client", () =>
+          setState((s) => {
+            const d = s.debts.find((x) => x.id === id);
+            return { ...s, debts: s.debts.filter((x) => x.id !== id), journal: d ? log(s, "debt", `Fiche supprimée : ${d.name} (solde ${money(debtBalance(d))})`, debtBalance(d)) : s.journal };
           }),
-        })),
-      removeClient: (id) => setState((s) => ({ ...s, debts: s.debts.filter((d) => d.id !== id) })),
+        ),
       markReminded: (id) =>
         setState((s) => ({ ...s, debts: s.debts.map((d) => (d.id === id ? { ...d, remindedAt: Date.now() } : d)) })),
-      addProduct: (p) => setState((s) => ({ ...s, products: [{ ...p, id: uid(), ts: Date.now() }, ...s.products] })),
+      addProduct: (p) =>
+        ownerOnly("ajouter un produit", () =>
+          setState((s) => ({ ...s, products: [{ ...p, id: uid(), ts: Date.now() }, ...s.products], journal: log(s, "product", `Produit ajouté : ${p.name} (stock ${p.stock}, prix ${money(p.price)})`) })),
+        ),
       updateProduct: (id, patch) =>
-        setState((s) => ({ ...s, products: s.products.map((p) => (p.id === id ? { ...p, ...patch } : p)) })),
-      deleteProduct: (id) => setState((s) => ({ ...s, products: s.products.filter((p) => p.id !== id) })),
+        ownerOnly("modifier un produit", () =>
+          setState((s) => {
+            const old = s.products.find((p) => p.id === id);
+            const bits: string[] = [];
+            if (old && patch.stock !== undefined && patch.stock !== old.stock) bits.push(`stock ${old.stock} → ${patch.stock}`);
+            if (old && patch.price !== undefined && patch.price !== old.price) bits.push(`prix ${money(old.price)} → ${money(patch.price)}`);
+            if (old && patch.cost !== undefined && patch.cost !== old.cost) bits.push(`achat ${money(old.cost)} → ${money(patch.cost)}`);
+            return {
+              ...s,
+              products: s.products.map((p) => (p.id === id ? { ...p, ...patch } : p)),
+              journal: old ? log(s, bits.some((b) => b.startsWith("stock")) ? "stock" : "product", `Produit modifié : ${old.name}${bits.length ? ` (${bits.join(", ")})` : ""}`) : s.journal,
+            };
+          }),
+        ),
+      deleteProduct: (id) =>
+        ownerOnly("supprimer un produit", () =>
+          setState((s) => ({ ...s, products: s.products.filter((p) => p.id !== id), journal: log(s, "product", `Produit supprimé : ${nameOf(s, id)}`) })),
+        ),
       sellProduct: (id, qty, seller) =>
         setState((s) => {
           const p = s.products.find((x) => x.id === id);
           if (!p || qty <= 0 || p.stock <= 0) return s;
           qty = Math.min(qty, p.stock);
+          const by = isStaff ? actor! : undefined;
           const txn: Txn = {
             id: uid(),
             type: "sale",
@@ -464,45 +842,71 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             category: "Vente",
             note: `${p.name} ×${qty}`,
             ts: Date.now(),
-            seller,
+            seller: by ?? seller,
+            by,
             items: [{ productId: p.id, name: p.name, qty, price: p.price, cost: p.cost }],
           };
           return {
             ...s,
             products: s.products.map((x) => (x.id === id ? { ...x, stock: Math.max(0, x.stock - qty) } : x)),
             txns: [txn, ...s.txns],
+            journal: log(s, "sale", `Vente : ${txn.note}`, txn.amount),
           };
         }),
       addSeller: (name) =>
-        setState((s) => {
-          const n = name.trim();
-          if (n.length < 2 || s.sellers.includes(n) || s.sellers.length >= 8) return s;
-          return { ...s, sellers: [...s.sellers, n] };
-        }),
-      removeSeller: (name) => setState((s) => ({ ...s, sellers: s.sellers.filter((x) => x !== name) })),
+        ownerOnly("ajouter un vendeur", () =>
+          setState((s) => {
+            const n = name.trim();
+            if (n.length < 2 || s.sellers.includes(n) || s.sellers.length >= 8) return s;
+            return { ...s, sellers: [...s.sellers, n] };
+          }),
+        ),
+      removeSeller: (name) =>
+        ownerOnly("retirer un vendeur", () =>
+          setState((s) => ({ ...s, sellers: s.sellers.filter((x) => x !== name), staff: s.staff.filter((x) => x.name !== name) })),
+        ),
       setPlan: (p) => setState((s) => (s.profile ? { ...s, profile: { ...s.profile, plan: p } } : s)),
-      updateProfile: (p) => setState((s) => (s.profile ? { ...s, profile: { ...s.profile, ...p } } : s)),
+      updateProfile: (p) =>
+        setState((s) => {
+          if (!s.profile) return s;
+          const pinChange = "pin" in p && p.pin !== s.profile.pin;
+          return {
+            ...s,
+            profile: { ...s.profile, ...p },
+            journal: pinChange ? log(s, "pin", p.pin ? "PIN patron défini ou modifié" : "PIN patron désactivé") : s.journal,
+          };
+        }),
       importAll: (d) =>
-        setState((s) => ({
-          ...s,
-          txns: d.txns ?? [],
-          debts: d.debts ?? [],
-          products: d.products ?? s.products,
-          sellers: d.sellers ?? s.sellers,
-        })),
+        ownerOnly("restaurer une sauvegarde", () =>
+          setState((s) => ({
+            ...s,
+            txns: d.txns ?? [],
+            debts: d.debts ?? [],
+            products: d.products ?? s.products,
+            sellers: d.sellers ?? s.sellers,
+            journal: log(s, "data", `Sauvegarde restaurée (${(d.txns ?? []).length} mouvements)`),
+          })),
+        ),
       resetData: () =>
-        setState((s) => ({
-          ...s,
-          txns: [],
-          debts: [],
-          products: [],
-          sellers: [],
-          profile: s.profile ? { ...s.profile, demo: false } : s.profile,
-        })),
-      resetAll: () => setState({ launched: true, profile: null, txns: [], debts: [], products: [], sellers: [] }),
-    }),
-    [state]
-  );
+        ownerOnly("effacer les données", () =>
+          setState((s) => ({
+            ...s,
+            txns: [],
+            debts: [],
+            products: [],
+            sellers: s.staff.map((x) => x.name),
+            closures: [],
+            profile: s.profile ? { ...s.profile, demo: false } : s.profile,
+            journal: log(s, "data", "Données effacées par le patron"),
+          })),
+        ),
+      resetAll: () =>
+        ownerOnly("réinitialiser l'app", () => {
+          setActor(null);
+          setState({ ...EMPTY, launched: true });
+        }),
+    };
+  }, [state, actor, rolesOn, isStaff, who]);
 
   return <StoreCtx.Provider value={api}>{children}</StoreCtx.Provider>;
 }

@@ -21,6 +21,8 @@ import History from "./History";
 import TxnDetail from "./TxnDetail";
 import { BACKUP_EVERY_DAYS, buildBackup, daysSinceBackup, saveBackup } from "../lib/backup";
 import DayClose from "./DayClose";
+import Control from "./Control";
+import { ShieldCheck } from "lucide-react";
 
 export default function Dashboard({
   onPremium,
@@ -29,7 +31,8 @@ export default function Dashboard({
   onPremium: () => void;
   onSettings: () => void;
 }) {
-  const { txns, debts, products, sellers, profile, updateProfile, resetData } = useStore();
+  const { txns, debts, products, sellers, profile, updateProfile, resetData, staff, closures, journal } = useStore();
+  const [ctlOpen, setCtlOpen] = useState(false);
   const [wipeAsk, setWipeAsk] = useState(false);
   const [detail, setDetail] = useState<Txn | null>(null);
   const [goalSheet, setGoalSheet] = useState(false);
@@ -314,6 +317,37 @@ export default function Dashboard({
         </motion.div>
       )}
 
+      {/* Contrôle de l'équipe */}
+      {staff.length > 0 &&
+        (() => {
+          const pending = txns.filter((x) => x.review === "pending").length;
+          const deniedToday = journal.filter((j) => j.action === "denied" && j.ts >= today).length;
+          const lastCl = closures.find((c) => c.staff);
+          const alert = pending > 0 || deniedToday > 0 || (lastCl && lastCl.diff < 0);
+          return (
+            <button
+              onClick={() => setCtlOpen(true)}
+              className={`tap card mt-3 flex w-full items-center gap-3 p-4 text-left ${alert ? "border-amber-500/40" : ""}`}
+            >
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border ${alert ? "border-amber-500/30 bg-amber-500/10 text-amber-600" : "border-mint/25 bg-mint/10 text-mint"}`}>
+                <ShieldCheck size={17} aria-hidden="true" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-bold">Contrôle de l'équipe</p>
+                <p className="truncate text-xs text-muted">
+                  {[
+                    pending ? `${pending} dépense${pending > 1 ? "s" : ""} à vérifier` : null,
+                    deniedToday ? `${deniedToday} tentative${deniedToday > 1 ? "s" : ""} refusée${deniedToday > 1 ? "s" : ""}` : null,
+                    lastCl ? `clôture ${lastCl.who} : ${lastCl.diff === 0 ? "juste" : lastCl.diff < 0 ? `manque ${fmtF(-lastCl.diff)}` : `surplus ${fmtF(lastCl.diff)}`}` : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ") || "Tout est en ordre · ouvre le journal"}
+                </p>
+              </div>
+            </button>
+          );
+        })()}
+
       {/* Graphique 7 jours */}
       <motion.div
         initial={{ opacity: 0, y: 24 }}
@@ -448,6 +482,7 @@ export default function Dashboard({
       <AnimatePresence>
         {histOpen && <History onClose={() => setHistOpen(false)} onPremium={onPremium} />}
         {closeOpen && <DayClose onClose={() => setCloseOpen(false)} />}
+        {ctlOpen && <Control onClose={() => setCtlOpen(false)} onPremium={onPremium} />}
       </AnimatePresence>
     </div>
   );

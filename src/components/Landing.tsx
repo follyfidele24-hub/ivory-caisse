@@ -214,7 +214,7 @@ const BENTO = [
   {
     icon: KeyRound,
     title: "Code PIN",
-    desc: "L'app se verrouille. Ni vendeuses, ni curieux.",
+    desc: "Un PIN pour le patron, un PIN par vendeur. Chacun ses droits.",
   },
   {
     icon: BarChart3,
@@ -255,7 +255,7 @@ const TESTIMONIALS = [
   {
     name: "Boutique avec vendeuses",
     role: "Cosmétiques, prêt-à-porter",
-    text: "Chaque vendeuse encaisse sous son nom. Le patron voit qui a vendu quoi, même quand il n'est pas là.",
+    text: "Chaque vendeur a son PIN. Il encaisse, mais ne touche ni au stock ni aux prix. Le journal montre qui a fait quoi, et la clôture de caisse montre l'écart.",
   },
 ];
 
@@ -292,7 +292,7 @@ const FAQ = [
   },
   {
     q: "Je peux l'utiliser avec mes vendeuses ?",
-    a: "Oui. Tu ajoutes chaque membre dans « Mon équipe », et au moment d'encaisser tu indiques qui a pris la vente. Les rapports montrent ensuite les encaissements de chacune. Le gratuit permet 1 vendeuse, le Premium une équipe illimitée.",
+    a: "Oui. Dans « Mon équipe », tu crées un accès avec un PIN pour chaque vendeur. Il encaisse et note les crédits, mais il ne peut ni modifier le stock, ni changer un prix, ni voir tes marges. Il annule sa vente seulement dans les 2 minutes ; au-delà, il faut ton PIN. Tout est noté dans le journal et il fait sa clôture de caisse le soir. Le gratuit permet 1 vendeur, le Premium une équipe illimitée.",
   },
   {
     q: "C'est disponible sur Google Play ?",

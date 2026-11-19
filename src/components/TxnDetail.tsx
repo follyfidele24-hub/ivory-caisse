@@ -3,9 +3,10 @@ import { Check, FileText, ImageDown, MessageCircle, Package, Pencil, Trash2, Use
 import { fmtF, fmtSigned, relDay, timeOf } from "../lib/format";
 import { exportReceiptPDF, shareReceipt } from "../lib/receipt";
 import { shareTicketImage } from "../lib/ticketImage";
-import { useStore, type Txn, type TxnType } from "../lib/store";
+import { cancelStatus, useStore, type Txn, type TxnType } from "../lib/store";
 import { EXP_CATS } from "./AddTxn";
 import { Btn, Seg, Sheet } from "./ui";
+import { OwnerPinSheet } from "./PinPad";
 
 /* yyyy-mm-dd et hh:mm locaux pour les champs date/heure */
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -34,7 +35,9 @@ export default function TxnDetail({
   onClose: () => void;
   notify: (m: string) => void;
 }) {
-  const { profile, sellers, deleteTxn, updateTxn } = useStore();
+  const { profile, sellers, deleteTxn, updateTxn, isStaff, actorName, journal, rules } = useStore();
+  const [askOwner, setAskOwner] = useState(false);
+  const cs = txn && isStaff ? cancelStatus(txn, actorName, journal, rules) : null;
   const [mode, setMode] = useState<"view" | "edit">("view");
   const [confirmDel, setConfirmDel] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -106,6 +109,7 @@ export default function TxnDetail({
   };
 
   return (
+    <>
     <Sheet open={txn !== null} onClose={onClose}>
       {txn && mode === "view" && (
         <>
@@ -157,6 +161,17 @@ export default function TxnDetail({
                 <span className="font-semibold">{txn.seller ?? profile?.name ?? "Moi"}</span>
               </div>
             )}
+            {txn.type === "expense" && txn.by && (
+              <div className="flex justify-between gap-3">
+                <span className="flex items-center gap-1 text-muted">
+                  <User size={12} aria-hidden="true" /> Saisi par
+                </span>
+                <span className="font-semibold">
+                  {txn.by}
+                  {txn.review === "pending" && <span className="text-amber-600"> · à vérifier</span>}
+                </span>
+              </div>
+            )}
             <div className="flex justify-between gap-3">
               <span className="text-muted">N° mouvement</span>
               <span className="font-mono text-xs font-semibold">{txn.id.toUpperCase()}</span>
@@ -166,21 +181,36 @@ export default function TxnDetail({
           <Btn variant="mint" className="w-full py-4" disabled={busy} onClick={() => run("image")}>
             <ImageDown size={17} aria-hidden="true" /> Ticket en image (WhatsApp)
           </Btn>
-          <div className="mt-2.5 grid grid-cols-3 gap-2.5">
+          <div className={`mt-2.5 grid gap-2.5 ${isStaff ? "grid-cols-2" : "grid-cols-3"}`}>
             <Btn variant="soft" className="px-2" disabled={busy} onClick={() => run("pdf")}>
               <FileText size={15} className="text-rose" aria-hidden="true" /> PDF
             </Btn>
             <Btn variant="soft" className="px-2" disabled={busy} onClick={() => run("text")}>
               <MessageCircle size={15} className="text-mint" aria-hidden="true" /> Texte
             </Btn>
-            <Btn variant="soft" className="px-2" onClick={() => setMode("edit")}>
-              <Pencil size={15} className="text-brand2" aria-hidden="true" /> Modifier
-            </Btn>
+            {!isStaff && (
+              <Btn variant="soft" className="px-2" onClick={() => setMode("edit")}>
+                <Pencil size={15} className="text-brand2" aria-hidden="true" /> Modifier
+              </Btn>
+            )}
           </div>
 
-          {!confirmDel ? (
+          {cs && !cs.ok ? (
+            <div className="mt-2.5 rounded-2xl border border-line bg-panel2 p-3 text-center">
+              <p className="text-xs font-semibold text-muted">
+                {!cs.mine
+                  ? "Ce mouvement n'est pas le tien : seul le patron peut l'annuler."
+                  : !cs.inTime
+                    ? `Le délai de ${rules.cancelMin} min est passé.`
+                    : "Tu as utilisé tes annulations du jour."}
+              </p>
+              <Btn variant="ghost" className="mt-1 w-full text-rose/90" onClick={() => setAskOwner(true)}>
+                <Trash2 size={15} aria-hidden="true" /> Annuler avec le PIN du patron
+              </Btn>
+            </div>
+          ) : !confirmDel ? (
             <Btn variant="ghost" className="mt-2.5 w-full text-rose/90" onClick={() => setConfirmDel(true)}>
-              <Trash2 size={15} aria-hidden="true" /> Supprimer ce mouvement
+              <Trash2 size={15} aria-hidden="true" /> {isStaff ? `Annuler ma saisie (reste ${cs?.left ?? 0} aujourd'hui)` : "Supprimer ce mouvement"}
             </Btn>
           ) : (
             <div className="mt-2.5 rounded-2xl border border-rose/25 bg-rose/10 p-3">
@@ -199,8 +229,8 @@ export default function TxnDetail({
                 <Btn
                   variant="danger"
                   onClick={() => {
-                    deleteTxn(txn.id);
-                    notify("Mouvement supprimé");
+                    const ok = deleteTxn(txn.id);
+                    notify(ok ? (isStaff ? "Saisie annulée · notée dans le journal" : "Mouvement supprimé") : "Annulation refusée");
                     onClose();
                   }}
                 >
@@ -316,5 +346,19 @@ export default function TxnDetail({
         </form>
       )}
     </Sheet>
+    <OwnerPinSheet
+      open={askOwner}
+      title="Annulation par le patron"
+      detail={txn ? `${txn.note || txn.category} · ${fmtF(txn.amount)}` : undefined}
+      onClose={() => setAskOwner(false)}
+      onOk={(pin) => {
+        setAskOwner(false);
+        if (!txn) return;
+        const ok = deleteTxn(txn.id, { ownerPin: pin });
+        notify(ok ? "Annulé avec l'accord du patron" : "Annulation refusée");
+        onClose();
+      }}
+    />
+    </>
   );
 }
