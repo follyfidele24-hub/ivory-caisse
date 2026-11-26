@@ -10,6 +10,7 @@ import { clearPending, getPending, recheckLicense, verifyPayment } from "./lib/p
 import { longDate } from "./lib/format";
 import Dashboard from "./components/Dashboard";
 import AddTxn from "./components/AddTxn";
+import { ping } from "./lib/stats";
 import StaffHome from "./components/StaffHome";
 
 /* Écrans chargés à la demande : l'app démarre plus vite en 3G */
@@ -41,7 +42,14 @@ import BottomNav, { type Tab } from "./components/BottomNav";
 import { Toast } from "./components/ui";
 
 function AppShell() {
-  const { profile, deleteTxn, updateProfile, setPlan, isStaff } = useStore();
+  const { profile, deleteTxn, updateProfile, setPlan, isStaff, paidPlan, trial } = useStore();
+
+  /* Statistiques anonymes (coupables dans Réglages) */
+  useEffect(() => {
+    if (!profile || profile.statsOff) return;
+    ping(paidPlan, trial);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.statsOff, paidPlan, trial.active, trial.ended]);
   const [premiumStep, setPremiumStep] = useState<"plans" | "success">("plans");
   const toastTimer = useRef<number | undefined>(undefined);
   const [tab, setTab] = useState<Tab>("home");

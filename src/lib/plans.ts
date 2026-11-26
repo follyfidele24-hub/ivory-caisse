@@ -42,7 +42,7 @@ export const PLANS: PlanDef[] = [
     price: "0 F",
     amount: 0,
     per: "pour toujours",
-    features: ["14 jours de Premium offerts au départ", "Ventes, dépenses & stock illimités", "5 clients crédit", "1 vendeur avec son PIN + journal 7 jours", "Rapports jour et semaine", "Historique 30 jours", "100% hors-ligne"],
+    features: ["7 jours de Premium offerts au départ", "Ventes, dépenses & stock illimités", "5 clients crédit", "1 vendeur avec son PIN + journal 7 jours", "Rapports jour et semaine", "Historique 30 jours", "100% hors-ligne"],
   },
   {
     id: "pro",

@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import {
+  BarChart3,
   ArrowLeft,
   Check,
   ChevronRight,
@@ -504,6 +505,22 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
       {/* Données */}
       <p className="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-muted">Données</p>
       <div className="card mb-4 divide-y divide-line overflow-hidden">
+        <label className="flex w-full cursor-pointer items-center gap-3.5 p-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-sky-400/25 bg-sky-400/10 text-sky-500">
+            <BarChart3 size={16} aria-hidden="true" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-bold">Statistiques anonymes</p>
+            <p className="text-xs text-muted">Aide Ivory Gestion à améliorer l'app. Aucun nom, numéro ni montant n'est envoyé.</p>
+          </div>
+          <input
+            type="checkbox"
+            className="h-6 w-6 accent-[var(--color-action)]"
+            checked={!profile?.statsOff}
+            onChange={(e) => updateProfile({ statsOff: !e.target.checked })}
+            aria-label="Envoyer des statistiques anonymes"
+          />
+        </label>
         <button onClick={exportData} className="tap flex w-full items-center gap-3.5 p-4 text-left transition-colors hover:bg-fg/[0.02]">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-mint/25 bg-mint/10 text-mint">
             <Download size={16} />
@@ -618,7 +635,7 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
           <BrandMark size={40} />
           <div className="flex-1">
             <p className="text-sm font-bold">Ivory Caisse</p>
-            <p className="text-xs text-muted">Version 2.9.0 · Membre depuis le {profile ? longDate(profile.created) : "—"}</p>
+            <p className="text-xs text-muted">Version 2.10.0 · Membre depuis le {profile ? longDate(profile.created) : "—"}</p>
           </div>
         </div>
         {/* Éditeur */}

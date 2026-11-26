@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Ivory Caisse · Compteur</title>
+<style>
+  :root { --ink:#f6f7fa; --fg:#141a33; --muted:#5b6078; --card:#fff; --line:#e6e8f0; --or:#c6490f; --vert:#086b48; --marine:#16235c; }
+  * { box-sizing: border-box; margin: 0; }
+  body { font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--ink); color: var(--fg); padding: 20px; }
+  main { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 26px; letter-spacing: -.5px; }
+  .sub { color: var(--muted); font-size: 14px; margin-top: 2px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 12px; margin-top: 18px; }
+  .k { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; }
+  .k b { display: block; font-size: 32px; letter-spacing: -1px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .k span { font-size: 13px; color: var(--muted); font-weight: 600; }
+  .k.hi { background: var(--marine); color: #fff; border: none; }
+  .k.hi span { color: #c9d3f5; }
+  h2 { font-size: 15px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin: 26px 0 10px; }
+  .bars { display: flex; align-items: flex-end; gap: 6px; height: 140px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px 14px 30px; position: relative; }
+  .bar { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; position: relative; }
+  .bar i { width: 100%; border-radius: 6px 6px 2px 2px; background: var(--or); min-height: 2px; }
+  .bar em { position: absolute; bottom: -22px; font-style: normal; font-size: 10px; color: var(--muted); }
+  .bar small { font-size: 10px; color: var(--fg); font-weight: 700; margin-bottom: 2px; }
+  table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 14px; overflow: hidden; border: 1px solid var(--line); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 15px; }
+  td:last-child { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+  form { display: flex; gap: 8px; margin-top: 18px; }
+  input { flex: 1; padding: 14px; border-radius: 14px; border: 1px solid var(--line); font: inherit; text-transform: uppercase; letter-spacing: 2px; }
+  button { padding: 14px 18px; border-radius: 14px; border: none; background: var(--or); color: #fff; font: inherit; font-weight: 700; cursor: pointer; min-height: 48px; }
+  .err { color: #b3123a; font-weight: 700; margin-top: 10px; }
+  .note { color: var(--muted); font-size: 13px; margin-top: 18px; }
+  .row { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap }
+  .ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<main>
+  <div class="row">
+    <div><h1>Compteur Ivory Caisse</h1><p class="sub" id="at">Statistiques anonymes · réservé à Ivory Gestion</p></div>
+    <div><button class="ghost" id="reload" hidden>Actualiser</button> <button class="ghost" id="out" hidden>Oublier le code</button></div>
+  </div>
+  <form id="f">
+    <label for="key" class="sub" style="position:absolute;left:-9999px">Code administrateur</label>
+    <input id="key" autocomplete="off" placeholder="Code administrateur" required />
+    <button>Voir</button>
+  </form>
+  <p class="err" id="err" role="alert"></p>
+  <section id="out-data" hidden></section>
+  <p class="note">Un téléphone = un identifiant aléatoire. Aucun nom, numéro ni montant n'est collecté. Les chiffres commencent à la version 2.10.0.</p>
+</main>
+<script>
+const $ = (s) => document.querySelector(s);
+const KEY = "ivory_stats_admin";
+const fmt = (n) => (n ?? 0).toLocaleString("fr-FR");
+async function load(code) {
+  $("#err").textContent = "";
+  const r = await fetch("/api/stats/summary", { headers: { "x-admin-key": code } }).catch(() => null);
+  if (!r) { $("#err").textContent = "Pas de connexion."; return; }
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok || !d.ok) { $("#err").textContent = d.error || "Erreur"; localStorage.removeItem(KEY); $("#f").hidden = false; return; }
+  localStorage.setItem(KEY, code);
+  $("#f").hidden = true; $("#reload").hidden = false; $("#out").hidden = false;
+  $("#at").textContent = "Mis à jour le " + new Date(d.at).toLocaleString("fr-FR");
+  const max = Math.max(1, ...d.daily.map((x) => Math.max(x.installs, x.active)));
+  const plans = { free: "Gratuit", pro: "Premium mensuel", year: "Annuel", life: "À vie" };
+  $("#out-data").hidden = false;
+  $("#out-data").innerHTML = `
+    <div class="grid">
+      <div class="k hi"><b>${fmt(d.installs)}</b><span>téléphones au total</span></div>
+      <div class="k"><b>${fmt(d.new7)}</b><span>nouveaux cette semaine</span></div>
+      <div class="k"><b>${fmt(d.active1)}</b><span>actifs aujourd'hui</span></div>
+      <div class="k"><b>${fmt(d.active7)}</b><span>actifs 7 derniers jours</span></div>
+      <div class="k"><b>${fmt(d.engaged)}</b><span>ouvert 3 jours ou plus</span></div>
+      <div class="k"><b>${fmt(d.android)}</b><span>via l'APK Android</span></div>
+    </div>
+    <h2>Essai et Premium</h2>
+    <div class="grid">
+      <div class="k"><b>${fmt(d.trialActive)}</b><span>essais en cours</span></div>
+      <div class="k"><b>${fmt(d.trialEndedFree)}</b><span>essais finis, restés gratuits</span></div>
+      <div class="k"><b style="color:var(--vert)">${fmt(d.premium)}</b><span>payants</span></div>
+      <div class="k hi"><b>${d.conversion === null ? "—" : d.conversion + " %"}</b><span>passent Premium après l'essai</span></div>
+    </div>
+    <h2>14 derniers jours (orange : installations)</h2>
+    <div class="bars">${d.daily.map((x) => `<div class="bar" title="${x.day} : ${x.installs} installations, ${x.active} actifs"><small>${x.installs || ""}</small><i style="height:${(x.installs / max) * 100}%"></i><em>${x.day.slice(8)}</em></div>`).join("")}</div>
+    <h2>Par offre</h2>
+    <table>${Object.entries(d.byPlan).map(([k, v]) => `<tr><td>${plans[k] || k}</td><td>${fmt(v)}</td></tr>`).join("")}</table>
+    <h2>Par version</h2>
+    <table>${Object.entries(d.versions).map(([k, v]) => `<tr><td>${k}</td><td>${fmt(v)}</td></tr>`).join("")}</table>`;
+}
+$("#f").addEventListener("submit", (e) => { e.preventDefault(); load($("#key").value.trim().toUpperCase()); });
+$("#reload").addEventListener("click", () => load(localStorage.getItem(KEY) || ""));
+$("#out").addEventListener("click", () => { localStorage.removeItem(KEY); location.reload(); });
+const saved = localStorage.getItem(KEY); if (saved) load(saved);
+</script>
+</body>
+</html>

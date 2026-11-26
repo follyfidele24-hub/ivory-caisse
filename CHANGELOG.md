@@ -1,5 +1,12 @@
 # Ivory Caisse — Journal des changements
 
+## 2.10.0 — compteur anonyme, essai de 7 jours
+
+- Essai Premium ramené à 7 jours (carte « Garder » à 3 jours de la fin).
+- Statistiques anonymes : un identifiant aléatoire par téléphone, la version, l'offre et l'état de l'essai.
+  Aucun nom, numéro ni montant. Interrupteur dans Réglages → Données. Politique de confidentialité mise à jour.
+- Compteur réservé à Ivory Gestion : /compteur (code administrateur, seule son empreinte est dans le code).
+
 ## 2.9.0 — essai Premium et stock bas
 
 - Essai Premium de 14 jours offert à chaque boutique (y compris celles créées avant), une seule fois.

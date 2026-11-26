@@ -79,7 +79,11 @@ const DOCS: Record<LegalDoc, { title: string; intro: string; sections: Section[]
         h: "3. Sauvegarde cloud (option Premium)",
         p: cloudReady
           ? "Si vous activez la sauvegarde cloud, vos données chiffrées sont envoyées sur nos serveurs (Firebase) associées au code secret que vous choisissez, afin de les restaurer en cas de perte du téléphone."
-          : "La sauvegarde cloud n'est pas encore proposée : aucune donnée n'est envoyée sur nos serveurs. Lorsqu'elle sera disponible, elle restera facultative et cette politique sera mise à jour avant son activation.",
+          : "La sauvegarde cloud n'est pas encore proposée : vos données commerciales ne sont pas envoyées sur nos serveurs. Lorsqu'elle sera disponible, elle restera facultative et cette politique sera mise à jour avant son activation.",
+      },
+      {
+        h: "3 bis. Statistiques anonymes",
+        p: "Pour savoir combien de commerçants utilisent l'application, elle envoie de temps en temps un signal anonyme : un identifiant aléatoire propre au téléphone, la version de l'app, le type d'offre (gratuit, essai ou Premium) et la date d'ouverture. Aucun nom, numéro de téléphone, montant, client ou article n'est envoyé. Vous pouvez couper cet envoi à tout moment dans Réglages, rubrique Données.",
       },
       {
         h: "4. Paiements",

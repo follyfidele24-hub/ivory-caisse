@@ -106,10 +106,12 @@ export interface Profile {
   trialStart?: number;
   /** Le patron a fermé la carte « essai terminé » */
   trialEndSeen?: boolean;
+  /** Le patron a coupé l'envoi des statistiques anonymes */
+  statsOff?: boolean;
 }
 
 /** Essai Premium offert à chaque nouvelle boutique */
-export const TRIAL_DAYS = 14;
+export const TRIAL_DAYS = 7;
 /** En gratuit, seul le premier vendeur créé garde son accès */
 export const FREE_STAFF = 1;
 

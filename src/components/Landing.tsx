@@ -509,7 +509,7 @@ export default function Landing({ onStart }: { onStart: () => void }) {
       <section className="mx-auto max-w-6xl px-5 py-24">
         <motion.div className="mb-14 max-w-2xl">
           <h2 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl">
-            Gratuit pour commencer, avec 14 jours de Premium offerts. Ensuite, Premium dès {"2\u00A0000\u00A0F"} par mois.
+            Gratuit pour commencer, avec 7 jours de Premium offerts. Ensuite, Premium dès {"2\u00A0000\u00A0F"} par mois.
           </h2>
           <div className="mt-6 flex flex-wrap items-center gap-2">
             {PAYMENTS.map((p) => (
