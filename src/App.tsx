@@ -66,7 +66,8 @@ function AppShell() {
     if (!profile || profile.plan === "free" || profile.plan === "life") return;
     if (typeof profile.premiumUntil === "number" && profile.premiumUntil < Date.now()) {
       setPlan("free");
-      updateProfile({ premiumUntil: undefined });
+      /* Un ancien abonné ne reçoit pas l'essai offert aux nouvelles boutiques */
+      updateProfile({ premiumUntil: undefined, trialStart: profile.trialStart ?? 1, trialEndSeen: true });
       showToast({ msg: "Ton Premium a expiré — renouvelle-le quand tu veux", kind: "info" }, 4000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -85,7 +86,7 @@ function AppShell() {
       } else if (!r.network && r.code !== "disabled") {
         /* Licence annulée, expirée ou retirée de ce téléphone */
         setPlan("free");
-        updateProfile({ licenseKey: undefined, premiumUntil: undefined, licenseCheckedAt: Date.now() });
+        updateProfile({ licenseKey: undefined, premiumUntil: undefined, licenseCheckedAt: Date.now(), trialStart: profile?.trialStart ?? 1, trialEndSeen: true });
         showToast({ msg: r.error, kind: "info" }, 4500);
       }
     });
