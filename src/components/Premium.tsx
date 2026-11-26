@@ -12,7 +12,7 @@ import { Capacitor } from "@capacitor/core";
 type Step = "plans" | "pay" | "store" | "key" | "success";
 
 export default function Premium({ onClose, initialStep = "plans" }: { onClose: () => void; initialStep?: Step }) {
-  const { profile, setPlan, updateProfile } = useStore();
+  const { profile, setPlan, updateProfile , paidPlan } = useStore();
   const [licOn, setLicOn] = useState<boolean | null>(null);
   const [keyInput, setKeyInput] = useState("");
   const [keyBusy, setKeyBusy] = useState(false);
@@ -32,7 +32,7 @@ export default function Premium({ onClose, initialStep = "plans" }: { onClose: (
   const [processing, setProcessing] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
 
-  const current = profile?.plan ?? "free";
+  const current = paidPlan;
   const storeBuild = Capacitor.isNativePlatform() && import.meta.env.VITE_STORE_BUILD === "true";
 
   const pick = (p: PlanDef) => {

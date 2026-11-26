@@ -214,7 +214,7 @@ function AppShell() {
               (isStaff ? (
                 <StaffHome onLock={() => setLocked(true)} />
               ) : (
-                <Dashboard onPremium={() => setPremiumOpen(true)} onSettings={() => setTab("settings")} />
+                <Dashboard onPremium={() => setPremiumOpen(true)} onSettings={() => setTab("settings")} onStock={() => setTab("stock")} />
               ))}
             {tab === "stock" && <Stock />}
             {tab === "debts" && <Debts onPremium={() => setPremiumOpen(true)} />}

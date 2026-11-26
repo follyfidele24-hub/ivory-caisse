@@ -12,7 +12,7 @@ const MAX_STAFF = 8;
 
 /** Le patron gère son équipe : un accès par vendeur avec son PIN, les règles, le contrôle. */
 export default function TeamCard({ onPremium, notify }: { onPremium: () => void; notify: (m: string) => void }) {
-  const { profile, staff, sellers, rules, txns, addStaff, setStaffPin, setStaffActive, removeStaff, removeSeller, setRules, ensureRecovery } = useStore();
+  const { profile, staff, sellers, rules, txns, staffAllowed, addStaff, setStaffPin, setStaffActive, removeStaff, removeSeller, setRules, ensureRecovery } = useStore();
   const [name, setName] = useState("");
   const [pin, setPin] = useState("");
   const [err, setErr] = useState<string | null>(null);
@@ -82,7 +82,9 @@ export default function TeamCard({ onPremium, notify }: { onPremium: () => void;
             <div key={s.name} className="flex items-center gap-2 px-3 py-2.5">
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold">{s.name}</p>
-                <p className={`text-[11px] font-semibold ${s.active ? "text-mint" : "text-muted"}`}>{s.active ? "Accès actif" : "Accès suspendu"}</p>
+                <p className={`text-[11px] font-semibold ${s.active && staffAllowed(s.name) ? "text-mint" : "text-muted"}`}>
+                  {!s.active ? "Accès suspendu" : staffAllowed(s.name) ? "Accès actif" : "En pause · Premium pour le réactiver"}
+                </p>
               </div>
               <button onClick={() => { setPinFor(s.name); setNewPin(""); setErr(null); }} className="tap btn-press flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-panel" aria-label={`Nouveau PIN pour ${s.name}`} title="Nouveau PIN">
                 <KeyRound size={15} aria-hidden="true" />

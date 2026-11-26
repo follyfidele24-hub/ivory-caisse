@@ -9,7 +9,7 @@ import { whatsappLink } from "../lib/contact";
 type Step = { kind: "who" } | { kind: "pin"; who: string | null } | { kind: "recover" };
 
 export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
-  const { profile, staff, rolesOn, login, recoverOwner, resetAll } = useStore();
+  const { profile, staff, rolesOn, login, recoverOwner, resetAll, staffAllowed } = useStore();
   const team = staff.filter((s) => s.active);
   const [step, setStep] = useState<Step>(rolesOn ? { kind: "who" } : { kind: "pin", who: null });
   const [secret, setSecret] = useState("");
@@ -68,15 +68,16 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
               {team.map((s) => (
                 <button
                   key={s.name}
-                  onClick={() => setStep({ kind: "pin", who: s.name })}
-                  className="tap btn-press flex min-h-14 items-center gap-3 rounded-2xl border border-line bg-panel px-4 text-left"
+                  onClick={() => staffAllowed(s.name) && setStep({ kind: "pin", who: s.name })}
+                  disabled={!staffAllowed(s.name)}
+                  className="tap btn-press flex min-h-14 items-center gap-3 rounded-2xl border border-line bg-panel px-4 text-left disabled:opacity-50"
                 >
                   <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-mint/30 bg-mint/10 text-mint">
                     <User size={17} aria-hidden="true" />
                   </span>
                   <span className="flex-1">
                     <span className="block text-sm font-extrabold">{s.name}</span>
-                    <span className="block text-[11px] font-semibold text-muted">Vendeur</span>
+                    <span className="block text-[11px] font-semibold text-muted">{staffAllowed(s.name) ? "Vendeur" : "Accès en pause · Premium"}</span>
                   </span>
                 </button>
               ))}

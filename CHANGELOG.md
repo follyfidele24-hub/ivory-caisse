@@ -1,5 +1,14 @@
 # Ivory Caisse — Journal des changements
 
+## 2.9.0 — essai Premium et stock bas
+
+- Essai Premium de 14 jours offert à chaque boutique (y compris celles créées avant), une seule fois.
+  Compte à rebours sur l'accueil, carte « Garder » à 3 jours de la fin, carte « essai terminé » ensuite.
+  Les données restent intactes à la fin ; les fonctions Premium se reverrouillent.
+- Fin d'essai ou d'abonnement : seul le premier vendeur créé garde son accès en gratuit, les autres passent « en pause ».
+- Stock bas affiché sur l'accueil du patron (touche pour ouvrir le Stock).
+- Corrections de textes : bannière Premium (plus de « sauvegarde cloud »), FAQ sauvegarde (l'équipe n'est pas restaurée).
+
 ## 2.8.0 — patron et vendeurs
 
 - Rôles : le patron a son PIN et tous les droits ; chaque vendeur a son propre PIN, créé et retiré par le patron.

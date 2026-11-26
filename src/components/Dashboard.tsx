@@ -22,16 +22,19 @@ import TxnDetail from "./TxnDetail";
 import { BACKUP_EVERY_DAYS, buildBackup, daysSinceBackup, saveBackup } from "../lib/backup";
 import DayClose from "./DayClose";
 import Control from "./Control";
-import { ShieldCheck } from "lucide-react";
+import { Package, ShieldCheck } from "lucide-react";
 
 export default function Dashboard({
   onPremium,
   onSettings,
+  onStock,
 }: {
   onPremium: () => void;
   onSettings: () => void;
+  onStock?: () => void;
 }) {
-  const { txns, debts, products, sellers, profile, updateProfile, resetData, staff, closures, journal } = useStore();
+  const { txns, debts, products, sellers, profile, updateProfile, resetData, staff, closures, journal, trial } = useStore();
+  const lowStock = products.filter((p) => p.stock <= p.alert);
   const [ctlOpen, setCtlOpen] = useState(false);
   const [wipeAsk, setWipeAsk] = useState(false);
   const [detail, setDetail] = useState<Txn | null>(null);
@@ -111,7 +114,7 @@ export default function Dashboard({
           </button>
           {profile?.plan !== "free" && (
             <span className="flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-brand2">
-              <Crown size={11} /> Premium
+              <Crown size={11} /> {trial.active ? "Essai" : "Premium"}
             </span>
           )}
         </div>
@@ -317,6 +320,60 @@ export default function Dashboard({
         </motion.div>
       )}
 
+      {/* Essai Premium : compte à rebours, plus visible à 3 jours de la fin */}
+      {trial.active && (
+        <button
+          onClick={onPremium}
+          className={`tap card mt-3 flex w-full items-center gap-3 p-4 text-left ${trial.daysLeft <= 3 ? "border-brand/50 bg-brand/10" : ""}`}
+        >
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-action to-action2 text-white">
+            <Crown size={17} aria-hidden="true" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold">
+              {trial.daysLeft <= 3
+                ? `Plus que ${trial.daysLeft} jour${trial.daysLeft > 1 ? "s" : ""} d'essai Premium`
+                : `Essai Premium offert · ${trial.daysLeft} jours restants`}
+            </p>
+            <p className="text-xs text-muted">
+              {trial.daysLeft <= 3 ? "Garde tes relances, tes marges et le bilan du mois : 2 000 F/mois" : "Tout est débloqué : crédits illimités, relances, marges, bilan du mois"}
+            </p>
+          </div>
+          {trial.daysLeft <= 3 && <span className="shrink-0 rounded-full bg-gradient-to-r from-action to-action2 px-3 py-1.5 text-[11px] font-extrabold text-white">Garder</span>}
+        </button>
+      )}
+      {trial.ended && !profile?.trialEndSeen && (
+        <div className="card mt-3 border-brand/40 p-4">
+          <p className="text-sm font-bold">Ton essai Premium est terminé</p>
+          <p className="mt-1 text-xs leading-relaxed text-muted">
+            Tes données sont intactes. Tu repasses en gratuit : 5 clients à crédit, rapports du jour et de la semaine, historique 30 jours.
+          </p>
+          <div className="mt-3 flex gap-2">
+            <Btn className="flex-1" onClick={onPremium}>
+              <Crown size={15} aria-hidden="true" /> Garder le Premium
+            </Btn>
+            <Btn variant="soft" onClick={() => updateProfile({ trialEndSeen: true })}>
+              Plus tard
+            </Btn>
+          </div>
+        </div>
+      )}
+
+      {/* Stock bas : visible dès l'accueil */}
+      {lowStock.length > 0 && (
+        <button onClick={onStock} className="tap card mt-3 flex w-full items-center gap-3 border-amber-500/40 p-4 text-left">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-600">
+            <Package size={17} aria-hidden="true" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold">
+              {lowStock.length === 1 ? "1 article à commander" : `${lowStock.length} articles à commander`}
+            </p>
+            <p className="truncate text-xs text-muted">{lowStock.map((p) => `${p.name} (${p.stock})`).join(" · ")}</p>
+          </div>
+        </button>
+      )}
+
       {/* Contrôle de l'équipe */}
       {staff.length > 0 &&
         (() => {
@@ -365,7 +422,7 @@ export default function Dashboard({
       </motion.div>
 
       {/* Bannière Premium */}
-      {profile?.plan === "free" && (
+      {profile?.plan === "free" && !(trial.ended && !profile?.trialEndSeen) && (
         <motion.button
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
@@ -378,7 +435,7 @@ export default function Dashboard({
           </div>
           <div className="flex-1">
             <p className="text-sm font-bold">Passe Premium à 2 000 F/mois</p>
-            <p className="text-xs text-muted">Export PDF · Sauvegarde cloud · Rapports mensuels</p>
+            <p className="text-xs text-muted">Crédits illimités · Relances WhatsApp · Bilan du mois</p>
           </div>
           <Sparkles size={16} className="shrink-0 text-brand2" />
         </motion.button>

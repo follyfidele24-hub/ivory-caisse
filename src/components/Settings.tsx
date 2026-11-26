@@ -52,6 +52,7 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
     products,
     sellers,
     staff,
+    trial,
   } = useStore();
   const [editOpen, setEditOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
@@ -227,7 +228,7 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
               isFree ? "bg-fg/8 text-muted" : "bg-brand/15 text-brand2"
             }`}
           >
-            <Crown size={9} /> {PLAN_LABEL[profile?.plan ?? "free"]}
+            <Crown size={9} /> {trial.active ? `Essai Premium · ${trial.daysLeft} j` : PLAN_LABEL[profile?.plan ?? "free"]}
           </span>
         </div>
         <button
@@ -617,7 +618,7 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
           <BrandMark size={40} />
           <div className="flex-1">
             <p className="text-sm font-bold">Ivory Caisse</p>
-            <p className="text-xs text-muted">Version 2.8.0 · Membre depuis le {profile ? longDate(profile.created) : "—"}</p>
+            <p className="text-xs text-muted">Version 2.9.0 · Membre depuis le {profile ? longDate(profile.created) : "—"}</p>
           </div>
         </div>
         {/* Éditeur */}

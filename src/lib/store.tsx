@@ -102,6 +102,31 @@ export interface Profile {
   receipt?: { city?: string; phone?: string; thanks?: string };
   /** Code de secours du patron (récupère le PIN sans la clé de licence) */
   recovery?: string;
+  /** Début de l'essai Premium offert (une seule fois par boutique) */
+  trialStart?: number;
+  /** Le patron a fermé la carte « essai terminé » */
+  trialEndSeen?: boolean;
+}
+
+/** Essai Premium offert à chaque nouvelle boutique */
+export const TRIAL_DAYS = 14;
+/** En gratuit, seul le premier vendeur créé garde son accès */
+export const FREE_STAFF = 1;
+
+export interface TrialInfo {
+  /** Essai en cours : l'app se comporte comme en Premium */
+  active: boolean;
+  /** Essai terminé sans abonnement */
+  ended: boolean;
+  until: number;
+  daysLeft: number;
+}
+
+export function trialInfo(p: Profile | null, now = Date.now()): TrialInfo {
+  if (!p?.trialStart || p.plan !== "free") return { active: false, ended: false, until: 0, daysLeft: 0 };
+  const until = p.trialStart + TRIAL_DAYS * 86_400_000;
+  const left = until - now;
+  return { active: left > 0, ended: left <= 0, until, daysLeft: Math.max(0, Math.ceil(left / 86_400_000)) };
 }
 
 /* ---------- Équipe, droits et contrôle ---------- */
@@ -243,7 +268,13 @@ type Res = { ok: true } | { ok: false; why: string };
 interface StoreShape {
   launched: boolean;
   markLaunched: () => void;
+  /** Profil vu par l'app : pendant l'essai, plan = "pro" */
   profile: Profile | null;
+  /** Plan réellement payé (sans l'essai) */
+  paidPlan: Plan;
+  trial: TrialInfo;
+  /** false si ce vendeur dépasse la limite du gratuit (accès en pause) */
+  staffAllowed: (name: string) => boolean;
   txns: Txn[];
   debts: Debt[];
   products: Product[];
@@ -497,9 +528,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  /* Essai Premium : donné une fois à chaque boutique gratuite, y compris celles créées avant cette version */
+  useEffect(() => {
+    if (state.profile && state.profile.plan === "free" && !state.profile.trialStart && !state.profile.licenseKey) {
+      setState((s) => (s.profile ? { ...s, profile: { ...s.profile, trialStart: Date.now() } } : s));
+    }
+  }, [state.profile]);
+
+  const trial = trialInfo(state.profile);
+  const effFree = state.profile?.plan === "free" && !trial.active;
+  const sortedStaff = [...state.staff].sort((a, b) => a.created - b.created);
+  const staffAllowed = (name: string) => !effFree || sortedStaff.findIndex((x) => x.name === name) < FREE_STAFF;
+
   const rolesOn = Boolean(state.profile?.pin) && state.staff.some((x) => x.active);
   /* Un nom de vendeur retiré ou désactivé ne garde aucun droit */
-  const isStaff = rolesOn && actor !== null && state.staff.some((x) => x.name === actor && x.active);
+  const isStaff = rolesOn && actor !== null && state.staff.some((x) => x.name === actor && x.active) && staffAllowed(actor);
   const who = isStaff ? actor! : OWNER;
 
   const api = useMemo<StoreShape>(() => {
@@ -523,7 +566,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
     return {
       launched: state.launched,
-      profile: state.profile,
+      profile: trial.active && state.profile ? { ...state.profile, plan: "pro" } : state.profile,
+      paidPlan: state.profile?.plan ?? "free",
+      trial,
+      staffAllowed,
       txns: state.txns,
       debts: state.debts,
       products: state.products,
@@ -545,7 +591,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           return true;
         }
         const st = state.staff.find((x) => x.name === target && x.active);
-        if (!st || st.pin !== pin) return false;
+        if (!st || st.pin !== pin || !staffAllowed(target)) return false;
         setActor(target);
         setState((s) => ({ ...s, journal: [{ id: uid(), ts: Date.now(), who: target, staff: true, action: "login", text: `Connexion de ${target}` }, ...s.journal] }));
         return true;
@@ -644,7 +690,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setState((s) => ({
           ...s,
           launched: true,
-          profile: { name, shop, plan: "free", created: Date.now(), pin: null, currency, theme: "sunset", demo: true },
+          profile: { name, shop, plan: "free", created: Date.now(), pin: null, currency, theme: "sunset", demo: true, trialStart: Date.now() },
           txns: seedTxns(),
           debts: seedDebts(),
           products: seedProducts(),
@@ -906,7 +952,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           setState({ ...EMPTY, launched: true });
         }),
     };
-  }, [state, actor, rolesOn, isStaff, who]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, actor, rolesOn, isStaff, who, trial.active, trial.daysLeft]);
 
   return <StoreCtx.Provider value={api}>{children}</StoreCtx.Provider>;
 }

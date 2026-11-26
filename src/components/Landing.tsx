@@ -275,8 +275,8 @@ const FAQ = [
   {
     q: "Et si je perds ou on me vole mon téléphone ?",
     a: cloudReady
-      ? "Avec le Premium, tu choisis un code secret et tu sauvegardes tes données. Sur ton nouveau téléphone, tu entres le même code et tout revient : ventes, crédits, stock, équipe."
-      : "Fais une sauvegarde régulière : Réglages, puis « Sauvegarder dans un fichier », et envoie-la sur ton WhatsApp. Sur ton nouveau téléphone, « Restaurer une sauvegarde » et tout revient : ventes, crédits, stock, équipe. L'app te rappelle de le faire.",
+      ? "Avec le Premium, tu choisis un code secret et tu sauvegardes tes données. Sur ton nouveau téléphone, tu entres le même code et tout revient : ventes, dépenses, crédits et stock. Les accès vendeurs se recréent en une minute dans « Mon équipe »."
+      : "Fais une sauvegarde régulière : Réglages, puis « Sauvegarder dans un fichier », et envoie-la sur ton WhatsApp. Sur ton nouveau téléphone, « Restaurer une sauvegarde » et tout revient : ventes, dépenses, crédits et stock. Les accès vendeurs se recréent en une minute dans « Mon équipe ». L'app te rappelle de le faire.",
   },
   {
     q: "Comment je paie l'abonnement ?",
@@ -509,7 +509,7 @@ export default function Landing({ onStart }: { onStart: () => void }) {
       <section className="mx-auto max-w-6xl px-5 py-24">
         <motion.div className="mb-14 max-w-2xl">
           <h2 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl">
-            Gratuit pour commencer. Premium dès {"2\u00A0000\u00A0F"} par mois.
+            Gratuit pour commencer, avec 14 jours de Premium offerts. Ensuite, Premium dès {"2\u00A0000\u00A0F"} par mois.
           </h2>
           <div className="mt-6 flex flex-wrap items-center gap-2">
             {PAYMENTS.map((p) => (
