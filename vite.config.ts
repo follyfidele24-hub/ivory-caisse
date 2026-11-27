@@ -8,6 +8,9 @@ import { defineConfig, type Plugin } from "vite";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+/** Jamais préchargés : téléchargés seulement quand on en a besoin (APK, exports, polices hors français). */
+const NEVER_PRECACHE = [/\.apk$/i, /(^|\/)(xlsx|jspdf|html2canvas|purify)[^/]*\.js$/i, /latin-ext/];
+
 /**
  * Après le build : écrit dans dist/sw.js la liste des fichiers à mettre en cache
  * (JS, CSS, polices latines, icônes) + une version unique, pour que l'app
@@ -40,9 +43,13 @@ function precacheManifest(): Plugin {
           !f.endsWith(".map") &&
           // polices : uniquement les sous-ensembles latins (les autres restent à la demande)
           (!f.endsWith(".woff2") || /latin/.test(f)) &&
-          !f.endsWith(".woff")
+          !f.endsWith(".woff") &&
+          !NEVER_PRECACHE.some((rule) => rule.test(f))
       );
       const shell = ["./", ...keep.map((f) => `./${f}`)];
+      // Garde-fou : le build échoue plutôt que de relivrer 4,6 Mo d'APK à chaque première visite.
+      const leaked = shell.filter((f) => NEVER_PRECACHE.some((rule) => rule.test(f.slice(2))));
+      if (leaked.length) throw new Error(`ivory-precache : fichiers interdits dans le precache : ${leaked.join(", ")}`);
       const swPath = path.join(dist, "sw.js");
       const sw = fs
         .readFileSync(swPath, "utf8")
