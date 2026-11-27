@@ -1,0 +1,6 @@
+# ESSAI CLOUDFLARE PAGES — équivalent des redirections de netlify.toml (que Cloudflare ne lit pas).
+# Ne pas fusionner dans ivory-caisse-app : Netlify a déjà ces règles dans netlify.toml.
+/compteur     /stats              200
+/apk          /ivory-caisse.apk   302
+/android      /apk                301
+/telecharger  /apk                301
