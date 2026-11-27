@@ -252,21 +252,6 @@ strong{font-weight:650;color:var(--ink)}
 .card--pad{padding:clamp(20px,2.4vw,28px)}
 .hairline{height:1px;background:var(--line);border:0;margin:0}
 
-/* ---------- topbar ---------- */
-.annonce{
-  background:var(--ink);color:#f7f8fc;
-  font-size:.86rem;text-align:center;padding:.55rem 3rem .55rem 1rem;
-  position:relative;z-index:60;
-}
-.annonce strong{color:#fff}
-.annonce a{color:#ffd7bd;text-underline-offset:3px}
-.annonce button{
-  position:absolute;right:.4rem;top:50%;transform:translateY(-50%);
-  width:34px;height:34px;border-radius:50%;border:0;background:transparent;color:#c9cee4;
-  display:grid;place-items:center;cursor:pointer;
-}
-.annonce button:hover{background:rgba(255,255,255,.1);color:#fff}
-
 .nav{
   position:sticky;top:0;z-index:50;
   background:color-mix(in srgb,var(--bg) 94%,transparent);
@@ -709,7 +694,7 @@ input[type="range"]::-moz-range-thumb{
 
 /* ---------- impression ---------- */
 @media print{
-  .nav,.sticky-cta,.annonce,.toast,.hero__visual{display:none!important}
+  .nav,.sticky-cta,.toast,.hero__visual{display:none!important}
   body{background:#fff;color:#000}
   .card,.plan,.ba{box-shadow:none}
 }
@@ -717,16 +702,6 @@ input[type="range"]::-moz-range-thumb{
 </head>
 <body>
 <a class="skip" href="#main">Aller au contenu</a>
-
-<!-- TODO(valeur réelle) : « 127 commerces » n'est alimenté par aucune donnée.
-     /api/stats/summary → 401 (route admin). Décision en attente : route publique /api/stats/public, ou valeur mise à jour à la main.
-     Si la valeur n'est pas vraie : retirer ce bandeau. -->
-<div class="annonce" id="annonce" role="region" aria-label="Nouveauté">
-  <strong id="live-count">127 commerces</strong> suivent déjà leur caisse avec Ivory&nbsp;Caisse — sans internet. <a href="#tarifs">Voir les formules →</a>
-  <button type="button" id="annonce-close" aria-label="Masquer ce message">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
-  </button>
-</div>
 
 <header class="nav" id="nav">
   <div class="wrap nav__in">
@@ -1298,14 +1273,6 @@ input[type="range"]::-moz-range-thumb{
     syncThemeBtn();
   });
 
-  /* ---------- 2. Barre d'annonce (fermable, mémorisée) ---------- */
-  var annonce = d.getElementById('annonce');
-  try { if (localStorage.getItem('ivory-annonce') === 'off') annonce.style.display = 'none'; } catch (e) {}
-  d.getElementById('annonce-close').addEventListener('click', function(){
-    annonce.style.display = 'none';
-    try { localStorage.setItem('ivory-annonce', 'off'); } catch (e) {}
-  });
-
   /* ---------- 3. Nav sticky + CTA sticky ---------- */
   var nav = d.getElementById('nav'), sticky = d.getElementById('sticky');
   var hero = d.querySelector('.hero');
@@ -1461,10 +1428,8 @@ input[type="range"]::-moz-range-thumb{
   d.getElementById('year').textContent = new Date().getFullYear();
 
   /* ---------- 11. Compteur ----------
-     TODO(valeur réelle)
-     /api/stats/summary → 401 : route admin, ne jamais l'appeler depuis le navigateur.
-     Option A : créer /api/stats/public qui renvoie { count } sans code.
-     Option C : garder la valeur statique et la mettre à jour à la main. */
+     Bandeau « N commerces » retiré : aucun chiffre non mesuré en production.
+     Retour prévu en Sprint 2 avec une route publique /api/stats/public (jamais /api/stats/summary : route admin). */
 
   /* ---------- 12. Hors-ligne : service worker unique (scope /) ---------- */
   if ('serviceWorker' in navigator) {
