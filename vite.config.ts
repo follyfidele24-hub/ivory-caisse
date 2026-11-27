@@ -53,17 +53,47 @@ function precacheManifest(): Plugin {
   };
 }
 
+/**
+ * Le SPA vit sous /app/ (la racine / est la landing statique de public/index.html).
+ * L'app référence en relatif ./payments/, ./screens/ et ./icons/ : on les recopie
+ * dans dist/app/ pour que /app/ (web) et l'APK (webDir dist/app) les trouvent.
+ */
+const APP_PUBLIC_DIRS = ["icons", "payments", "screens"];
+function appPublicCopy(): Plugin {
+  return {
+    name: "ivory-app-public",
+    apply: "build",
+    // order "pre" : la copie doit exister avant que precacheManifest() liste dist/
+    closeBundle: {
+      order: "pre",
+      handler() {
+        const dist = path.resolve(__dirname, "dist");
+        for (const dir of APP_PUBLIC_DIRS) {
+          fs.cpSync(path.join(dist, dir), path.join(dist, "app", dir), { recursive: true });
+        }
+        // Vite écrit "../app/assets/…" dans dist/app/index.html : juste sur le web,
+        // faux dans l'APK (racine = dist/app). "./assets/…" marche dans les deux cas.
+        const html = path.join(dist, "app", "index.html");
+        fs.writeFileSync(html, fs.readFileSync(html, "utf8").replaceAll('"../app/assets/', '"./assets/'));
+      },
+    },
+  };
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   base: "./",
-  plugins: [react(), tailwindcss(), precacheManifest()],
+  plugins: [react(), tailwindcss(), appPublicCopy(), precacheManifest()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
     },
   },
   build: {
+    // Bundles de l'app rangés sous dist/app/assets, séparés des fichiers de la landing (dist/assets)
+    assetsDir: "app/assets",
     rollupOptions: {
+      input: path.resolve(__dirname, "app/index.html"),
       output: {
         manualChunks: {
           react: ["react", "react-dom"],

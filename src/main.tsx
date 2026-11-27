@@ -18,7 +18,7 @@ void setupNativeRuntime();
 // Mode hors-ligne complet (PWA) — uniquement en production
 if (!Capacitor.isNativePlatform() && "serviceWorker" in navigator && import.meta.env.PROD) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js").catch(() => {
+    navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {
       /* hors-ligne indisponible, l'app reste fonctionnelle */
     });
   });
