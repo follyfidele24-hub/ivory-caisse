@@ -2,6 +2,10 @@
 <html lang="fr" data-theme="light">
 <head>
 <meta charset="utf-8" />
+<script>
+  /* Retour de paiement : /api/pay/return renvoie vers /?paiement=retour → la vérification vit dans l'app. */
+  if (new URLSearchParams(location.search).get('paiement') === 'retour') location.replace('/app/' + location.search);
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Ivory Caisse — La caisse hors-ligne du commerçant africain (FCFA)</title>
 <meta name="description" content="Ventes, dépenses, crédits clients, stock : Ivory Caisse remplace ton cahier, même sans réseau. Pensée pour les boutiques, étals et maquis d'Abidjan et d'Afrique de l'Ouest. Gratuit pour commencer, Premium dès 2 000 F/mois." />

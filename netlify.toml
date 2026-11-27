@@ -15,21 +15,8 @@
 
 # ---------- 1. Redirections ----------
 
-# Retour de paiement : /api/pay/return renvoie vers /?paiement=retour&tx=…
-# (fonction inchangée). On aiguille vers l'app pour que la vérification tourne.
-[[redirects]]
-  from = "/"
-  to = "/app/?paiement=retour&tx=:tx"
-  status = 302
-  force = true
-  query = { paiement = "retour", tx = ":tx" }
-
-[[redirects]]
-  from = "/"
-  to = "/app/?paiement=retour"
-  status = 302
-  force = true
-  query = { paiement = "retour" }
+# Retour de paiement : /api/pay/return renvoie vers /?paiement=retour&tx=… (fonction inchangée).
+# L'aiguillage vers /app/ est fait par 1 ligne de script dans le <head> de la landing.
 
 # Existant — conservé tel quel
 [[redirects]]
