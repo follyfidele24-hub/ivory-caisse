@@ -3,7 +3,8 @@ import type { CapacitorConfig } from "@capacitor/cli";
 const config: CapacitorConfig = {
   appId: "com.ivorygestion.ivorycaisse",
   appName: "Ivory Caisse",
-  webDir: "dist",
+  // Le SPA est servi sous /app/ sur le web ; l'APK embarque uniquement l'app (pas la landing).
+  webDir: "dist/app",
   server: {
     androidScheme: "https",
   },

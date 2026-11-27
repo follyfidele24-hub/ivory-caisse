@@ -1,3 +1,11 @@
+# ============================================================
+#  Ivory Caisse — configuration Netlify (fusion existant + kit Thanos v3.1)
+#  /            → landing statique (public/index.html)
+#  /app/        → SPA (dist/app/)
+#  /api/*       → Netlify Functions (chemins déclarés dans chaque fonction)
+#  Source unique des en-têtes : ce fichier (public/_headers supprimé).
+# ============================================================
+
 [build]
   command = "npm run build"
   publish = "dist"
@@ -5,6 +13,12 @@
 [build.environment]
   NODE_VERSION = "22"
 
+# ---------- 1. Redirections ----------
+
+# Retour de paiement : /api/pay/return renvoie vers /?paiement=retour&tx=… (fonction inchangée).
+# L'aiguillage vers /app/ est fait par 1 ligne de script dans le <head> de la landing.
+
+# Existant — conservé tel quel
 [[redirects]]
   from = "/compteur"
   to = "/stats.html"
@@ -29,17 +43,77 @@
   status = 301
   force = true
 
+# Kit — page compteur et SPA
+[[redirects]]
+  from = "/stats"
+  to = "/stats.html"
+  status = 200
+
+# L'app garde ses URL au rechargement (fichiers existants servis en priorité)
+[[redirects]]
+  from = "/app/*"
+  to = "/app/index.html"
+  status = 200
+
+# Kit — anciennes URL → ancres de la landing (301 pour le SEO)
+[[redirects]]
+  from = "/tarifs"
+  to = "/#tarifs"
+  status = 301
+
+[[redirects]]
+  from = "/pricing"
+  to = "/#tarifs"
+  status = 301
+
+[[redirects]]
+  from = "/faq"
+  to = "/#faq"
+  status = 301
+
+# ---------- 2. En-têtes ----------
+
 [[headers]]
-  for = "/ivory-caisse.apk"
+  for = "/*"
   [headers.values]
-    Content-Type = "application/vnd.android.package-archive"
-    Content-Disposition = "attachment; filename=ivory-caisse.apk"
-    Cache-Control = "no-cache"
+    # TODO(domaine) : remettre "; preload" seulement avec un domaine propre.
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(self), usb=()"
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Resource-Policy = "same-origin"
+    # CSP stricte (option B). 'unsafe-inline' requis : la landing embarque son script.
+    # Sauvegarde cloud Firebase : ajouter à connect-src, le jour où elle sort :
+    #   https://*.googleapis.com https://*.firebaseio.com https://*.firebase.com wss://*.firebaseio.com
+    Content-Security-Policy = "default-src 'self'; img-src 'self' data: blob:; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://wa.me; upgrade-insecure-requests"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/app/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/icons/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
 
 [[headers]]
   for = "/sw.js"
   [headers.values]
     Cache-Control = "no-cache, no-store, must-revalidate"
+    Service-Worker-Allowed = "/"
 
 [[headers]]
   for = "/manifest.webmanifest"
@@ -47,11 +121,11 @@
     Content-Type = "application/manifest+json"
     Cache-Control = "public, max-age=3600"
 
+# Existant — conservé : téléchargement direct, jamais de version périmée
 [[headers]]
-  for = "/*"
+  for = "/ivory-caisse.apk"
   [headers.values]
-    X-Frame-Options = "DENY"
-    Content-Security-Policy = "frame-ancestors 'none'"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Content-Type = "application/vnd.android.package-archive"
+    Content-Disposition = "attachment; filename=ivory-caisse.apk"
+    Cache-Control = "no-cache"
+    X-Robots-Tag = "noindex"
