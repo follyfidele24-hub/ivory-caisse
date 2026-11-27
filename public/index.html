@@ -692,6 +692,13 @@ input[type="range"]::-moz-range-thumb{
 .skip:focus{top:12px}
 .sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 
+/* ---------- PWA installée (ancien manifest) : un seul bouton vers la caisse ---------- */
+.app-redirect{display:none}
+@media (display-mode: standalone){
+  body > *:not(.app-redirect){display:none !important}
+  .app-redirect{display:grid !important}
+}
+
 /* ---------- impression ---------- */
 @media print{
   .nav,.sticky-cta,.toast,.hero__visual{display:none!important}
@@ -701,6 +708,9 @@ input[type="range"]::-moz-range-thumb{
 </style>
 </head>
 <body>
+<a class="app-redirect" href="/app/" style="position:fixed;inset:0;place-items:center;background:var(--bg);color:var(--ink);font-weight:650;font-size:1.1rem;text-decoration:none;z-index:9999">
+  Ouvrir ma caisse →
+</a>
 <a class="skip" href="#main">Aller au contenu</a>
 
 <header class="nav" id="nav">
