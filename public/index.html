@@ -1366,6 +1366,7 @@ input[type="range"]::-moz-range-thumb{
   d.getElementById('demo-add').addEventListener('click', function(){
     if (!amount) { toast('Tape d\'abord un montant 🙂'); return; }
     ventes += amount;
+    track('demo_add', { demo_used: true }); // jamais le montant saisi
     toast('Vente de ' + fmt(amount) + ' enregistrée');
     amount = 0; paint();
   });
@@ -1422,9 +1423,15 @@ input[type="range"]::-moz-range-thumb{
   /* ---------- 9. Mesure (à brancher) ----------
      Remplace par ton endpoint ou un outil sans cookie.
      Chaque CTA porte data-cta="…", chaque section un id. */
+  /* Envoi anonyme vers /api/track : aucun cookie, session aléatoire en mémoire, jamais bloquant. */
+  var SID = Math.random().toString(36).slice(2, 12);
   function track(name, props){
-    // window.ivoryTrack && window.ivoryTrack(name, props);
     if (window.IVORY_DEBUG) console.log('[track]', name, props || {});
+    try {
+      var body = JSON.stringify({ name: name, props: props || {}, t: Date.now(), sid: SID });
+      if (navigator.sendBeacon && navigator.sendBeacon('/api/track', new Blob([body], { type: 'application/json' }))) return;
+      fetch('/api/track', { method: 'POST', body: body, headers: { 'Content-Type': 'application/json' }, keepalive: true }).catch(function(){});
+    } catch (e) {}
   }
   d.addEventListener('click', function(e){
     var a = e.target.closest('[data-cta]');
@@ -1434,12 +1441,15 @@ input[type="range"]::-moz-range-thumb{
     var seen = {};
     var io2 = new IntersectionObserver(function(es){
       es.forEach(function(en){
-        if (en.isIntersecting && !seen[en.target.id]) {
+        // 40 % de la section OU 40 % de l'écran : sinon une section plus haute que 2,5 écrans
+        // (Tarifs sur mobile) ne déclenche jamais l'événement.
+        var visible = en.intersectionRect.height >= Math.min(en.boundingClientRect.height, window.innerHeight) * .4;
+        if (en.isIntersecting && visible && !seen[en.target.id]) {
           seen[en.target.id] = 1;
           track('section_view', {id: en.target.id});
         }
       });
-    }, {threshold:.4});
+    }, {threshold:[0,.1,.2,.3,.4]});
     ['tarifs','demo','faq','installer'].forEach(function(id){ var el = d.getElementById(id); if (el) io2.observe(el); });
   }
 
