@@ -84,7 +84,7 @@ function appPublicCopy(): Plugin {
         // Vite écrit "../app/assets/…" dans dist/app/index.html : juste sur le web,
         // faux dans l'APK (racine = dist/app). "./assets/…" marche dans les deux cas.
         const html = path.join(dist, "app", "index.html");
-        fs.writeFileSync(html, fs.readFileSync(html, "utf8").replaceAll('"../app/assets/', '"./assets/'));
+        fs.writeFileSync(html, fs.readFileSync(html, "utf8").split('"../app/assets/').join('"./assets/'));
       },
     },
   };
