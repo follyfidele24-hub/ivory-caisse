@@ -285,7 +285,8 @@ function Root() {
   return (
     <Suspense fallback={<ScreenLoader />}>
     <AnimatePresence mode="wait">
-      {!launched && !Capacitor.isNativePlatform() ? (
+      {/* Sous /app/, la landing statique (/) a déjà été vue : on va droit à l'onboarding */}
+      {!launched && !Capacitor.isNativePlatform() && !window.location.pathname.startsWith("/app") ? (
         <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 0.98 }}>
           <Landing onStart={markLaunched} />
         </motion.div>
