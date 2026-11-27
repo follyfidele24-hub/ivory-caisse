@@ -1420,18 +1420,22 @@ input[type="range"]::-moz-range-thumb{
   });
   if ('IntersectionObserver' in window) {
     var seen = {};
-    var io2 = new IntersectionObserver(function(es){
-      es.forEach(function(en){
-        // 40 % de la section OU 40 % de l'écran : sinon une section plus haute que 2,5 écrans
-        // (Tarifs sur mobile) ne déclenche jamais l'événement.
-        var visible = en.intersectionRect.height >= Math.min(en.boundingClientRect.height, window.innerHeight) * .4;
-        if (en.isIntersecting && visible && !seen[en.target.id]) {
-          seen[en.target.id] = 1;
-          track('section_view', {id: en.target.id});
-        }
-      });
-    }, {threshold:[0,.1,.2,.3,.4]});
-    ['tarifs','demo','faq','installer'].forEach(function(id){ var el = d.getElementById(id); if (el) io2.observe(el); });
+    // Seuil dynamique par section : 50 % de la section, ou 400 px visibles si elle est plus haute que 800 px.
+    // Un seuil fixe ne se déclenche jamais sur une section plus haute que l'écran (Tarifs : 2 301 px sur mobile).
+    ['tarifs','demo','faq','installer'].forEach(function(id){
+      var el = d.getElementById(id); if (!el) return;
+      var threshold = Math.min(.5, 400 / Math.max(el.offsetHeight, 1));
+      var io2 = new IntersectionObserver(function(es){
+        es.forEach(function(en){
+          if (en.intersectionRatio >= threshold && !seen[id]) {
+            seen[id] = 1;
+            track('section_view', {id: id});
+            io2.disconnect();
+          }
+        });
+      }, {threshold: threshold});
+      io2.observe(el);
+    });
   }
 
   /* ---------- 10. Année ---------- */
