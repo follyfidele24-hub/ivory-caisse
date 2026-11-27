@@ -9,6 +9,23 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
+ * Fichiers JAMAIS préchargés par le service worker (chemins relatifs à dist/).
+ * Bug corrigé : l'ancien filtre laissait passer ivory-caisse.apk (4,6 Mo à la 1re visite)
+ * et les exports lourds (xlsx, jspdf, html2canvas, purify).
+ */
+const NEVER_PRECACHE: RegExp[] = [
+  /\.apk$/i, // APK : téléchargé seulement à la demande via /android
+  /(^|\/)(xlsx|jspdf|html2canvas|purify)[^/]*\.js$/i, // exports lourds : à la demande (runtime)
+  /\/firebase-/, // sauvegarde cloud = réseau obligatoire
+  /^(sw\.js|_headers|_redirects|404\.html|og\.png|robots\.txt|sitemap\.xml)$/, // fichiers serveur / partage
+  /^(stats|install|privacy|terms|support)\.html$/, // pages secondaires : mises en cache à la visite
+  /^(payments|screens)\//, // doublons racine : l'app utilise app/payments et app/screens
+  /\.map$/,
+  /\.woff$/,
+  /^(?!.*latin).*\.woff2$/, // polices : uniquement les sous-ensembles latins (comme avant)
+];
+
+/**
  * Après le build : écrit dans dist/sw.js la liste des fichiers à mettre en cache
  * (JS, CSS, polices latines, icônes) + une version unique, pour que l'app
  * fonctionne hors-ligne dès la première visite, écrans chargés à la demande inclus.
@@ -28,26 +45,19 @@ function precacheManifest(): Plugin {
         }
       };
       walk(dist);
-      const keep = files.filter(
-        (f) =>
-          f !== "sw.js" &&
-          f !== "_headers" &&
-          f !== "og.png" &&
-          f !== "404.html" &&
-          f !== "_redirects" &&
-          // Firebase : sauvegarde cloud = réseau obligatoire, inutile de le pré-télécharger
-          !/\/firebase-/.test(f) &&
-          !f.endsWith(".map") &&
-          // polices : uniquement les sous-ensembles latins (les autres restent à la demande)
-          (!f.endsWith(".woff2") || /latin/.test(f)) &&
-          !f.endsWith(".woff")
-      );
-      const shell = ["./", ...keep.map((f) => `./${f}`)];
+      const keep = files.filter((f) => !NEVER_PRECACHE.some((rule) => rule.test(f)));
+      const shell = ["/", "/app/", ...keep.map((f) => `/${f}`)];
       const swPath = path.join(dist, "sw.js");
-      const sw = fs
-        .readFileSync(swPath, "utf8")
-        .replace(/const CACHE = "[^"]*";/, `const CACHE = "ivory-caisse-${Date.now().toString(36)}";`)
+      const src = fs.readFileSync(swPath, "utf8");
+      const sw = src
+        .replace(/const CACHE = "[^"]*";/, `const CACHE = "ivory-v3-${Date.now().toString(36)}";`)
         .replace(/const APP_SHELL = \[[^\]]*\];/, `const APP_SHELL = ${JSON.stringify(shell)};`);
+      // Garde-fou : si les marqueurs ont disparu de public/sw.js, le build échoue au lieu de livrer un SW vide.
+      if (sw === src || !sw.includes('const CACHE = "ivory-v3-')) {
+        throw new Error("ivory-precache : marqueurs CACHE / APP_SHELL introuvables dans dist/sw.js");
+      }
+      const leaked = shell.filter((f) => /\.apk$|xlsx|jspdf|html2canvas|purify/i.test(f));
+      if (leaked.length) throw new Error(`ivory-precache : fichiers interdits dans le precache : ${leaked.join(", ")}`);
       fs.writeFileSync(swPath, sw);
     },
   };
