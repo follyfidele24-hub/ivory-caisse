@@ -1,0 +1,19 @@
+# TODO(domaine) : si un domaine propre est acheté, remplacer ivory-caisse.netlify.app ici et dans sitemap.xml.
+User-agent: *
+Allow: /
+Disallow: /stats
+Disallow: /compteur
+Disallow: /api/
+Disallow: /app/
+
+# Les moteurs génératifs sont les bienvenus : ils citent la source.
+User-agent: GPTBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://ivory-caisse.netlify.app/sitemap.xml
