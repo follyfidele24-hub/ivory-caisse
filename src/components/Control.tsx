@@ -2,7 +2,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { AlertTriangle, Check, ClipboardCheck, Crown, Lock, ScrollText, ShieldAlert, User, X } from "lucide-react";
 import { DAY, fmtF, relDay, startOfDay, timeOf } from "../lib/format";
-import { OWNER, useStore, type JournalAction } from "../lib/store";
+import { fullJournal, OWNER, useStore, type JournalAction } from "../lib/store";
 import { Btn, Seg } from "./ui";
 
 const FREE_DAYS = 7;
@@ -21,7 +21,7 @@ export default function Control({ onClose, onPremium, initial = "journal" }: { o
   const { journal, closures, txns, staff, profile, markReviewed } = useStore();
   const [tab, setTab] = useState<"journal" | "closures" | "review">(initial);
   const [who, setWho] = useState<string | null>(null);
-  const free = profile?.plan === "free";
+  const free = !fullJournal(profile?.plan);
   const limit = free ? startOfDay(Date.now()) - (FREE_DAYS - 1) * DAY : 0;
 
   const people = [OWNER, ...staff.map((s) => s.name)];
@@ -167,7 +167,7 @@ export default function Control({ onClose, onPremium, initial = "journal" }: { o
 
         {free && hidden > 0 && tab !== "review" && (
           <button onClick={onPremium} className="tap btn-press mt-5 flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-brand/30 bg-brand/10 px-4 py-3 text-sm font-bold text-brand2">
-            <Lock size={14} aria-hidden="true" /> {hidden} ligne{hidden > 1 ? "s" : ""} plus ancienne{hidden > 1 ? "s" : ""} · journal complet en Premium
+            <Lock size={14} aria-hidden="true" /> {hidden} ligne{hidden > 1 ? "s" : ""} plus ancienne{hidden > 1 ? "s" : ""} · journal complet avec Boutique
           </button>
         )}
       </div>

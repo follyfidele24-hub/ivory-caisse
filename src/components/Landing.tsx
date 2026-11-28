@@ -280,7 +280,7 @@ const FAQ = [
   },
   {
     q: "Comment je paie l'abonnement ?",
-    a: "Depuis l'application : tu choisis ta formule, tu paies sur la page sécurisée de la boutique Ivory Gestion, puis tu colles la clé reçue par e-mail. À partir de 2 000 F par mois, ou 25 000 F une seule fois pour la version à vie.",
+    a: "Depuis l'application : tu choisis ta formule, tu paies sur la page sécurisée de la boutique Ivory Gestion, puis tu colles la clé reçue par e-mail. Essentiel à 5 000 F par mois, Boutique à 12 000 F par mois, ou 50 000 F pour un an (2 mois offerts).",
   },
   {
     q: "Que se passe-t-il à la fin de ma licence ?",
@@ -509,7 +509,7 @@ export default function Landing({ onStart }: { onStart: () => void }) {
       <section className="mx-auto max-w-6xl px-5 py-24">
         <motion.div className="mb-14 max-w-2xl">
           <h2 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl">
-            Gratuit pour commencer, avec 7 jours de Premium offerts. Ensuite, Premium dès {"2\u00A0000\u00A0F"} par mois.
+            Gratuit pour commencer, avec 7 jours de Boutique offerts. Ensuite, dès {"5\u00A0000\u00A0F"} par mois.
           </h2>
           <div className="mt-6 flex flex-wrap items-center gap-2">
             {PAYMENTS.map((p) => (

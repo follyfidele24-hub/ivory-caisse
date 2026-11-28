@@ -336,7 +336,7 @@ export default function Dashboard({
                 : `Essai Premium offert · ${trial.daysLeft} jours restants`}
             </p>
             <p className="text-xs text-muted">
-              {trial.daysLeft <= 3 ? "Garde tes relances, tes marges et le bilan du mois : 2 000 F/mois" : "Tout est débloqué : crédits illimités, relances, marges, bilan du mois"}
+              {trial.daysLeft <= 3 ? "Garde tes relances, tes marges et le bilan du mois : 5 000 F/mois" : "Tout est débloqué : crédits illimités, relances, marges, équipe, bilan du mois"}
             </p>
           </div>
           {trial.daysLeft <= 3 && <span className="shrink-0 rounded-full bg-gradient-to-r from-action to-action2 px-3 py-1.5 text-[11px] font-extrabold text-white">Garder</span>}
@@ -434,8 +434,8 @@ export default function Dashboard({
             <Crown size={17} />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-bold">Passe Premium à 2 000 F/mois</p>
-            <p className="text-xs text-muted">Crédits illimités · Relances WhatsApp · Bilan du mois</p>
+            <p className="text-sm font-bold">Passe à l'Essentiel : 5 000 F/mois</p>
+            <p className="text-xs text-muted">167 F par jour · crédits illimités, relances, bilan du mois</p>
           </div>
           <Sparkles size={16} className="shrink-0 text-brand2" />
         </motion.button>

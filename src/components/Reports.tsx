@@ -9,7 +9,7 @@ const CategoryDonut = lazy(() => import("./Charts").then((m) => ({ default: m.Ca
 const ChartSkeleton = ({ h }: { h: number }) => (
   <div className="h-full animate-pulse rounded-2xl bg-fg/[0.04]" style={{ minHeight: h }} aria-hidden="true" />
 );
-import { totals, useStore, type Product, type Txn } from "../lib/store";
+import { hasDossier, totals, useStore, type Product, type Txn } from "../lib/store";
 
 type Range = "day" | "week" | "month";
 
@@ -119,7 +119,7 @@ export default function Reports({ onPremium }: { onPremium: () => void }) {
   const rangeLabel = range === "day" ? "jour" : range === "week" ? "semaine" : "mois";
 
   /* Dossier d'activité 12 mois : licences Annuel et À vie */
-  const canDossier = profile?.plan === "year" || profile?.plan === "life";
+  const canDossier = hasDossier(profile?.plan);
   const tryDossier = async () => {
     if (!canDossier) {
       onPremium();
@@ -352,13 +352,13 @@ export default function Reports({ onPremium }: { onPremium: () => void }) {
         </p>
       </div>
 
-      {/* Dossier microfinance (Annuel, À vie) */}
+      {/* Dossier microfinance (Boutique, Essentiel annuel, À vie) */}
       <section aria-label="Dossier d'activité 12 mois" className="card mt-4 p-5">
         <div className="flex items-baseline justify-between gap-3">
           <h2 className="font-display text-base font-extrabold">Dossier pour un prêt</h2>
           {!canDossier && (
             <span className="flex items-center gap-1 rounded-full bg-brand/10 px-2.5 py-1 text-[10px] font-extrabold uppercase text-brand2">
-              <Lock size={10} aria-hidden="true" /> Annuel
+              <Lock size={10} aria-hidden="true" /> Boutique
             </span>
           )}
         </div>
@@ -367,7 +367,7 @@ export default function Reports({ onPremium }: { onPremium: () => void }) {
           ta banque ou ta tontine.
         </p>
         <Btn variant={canDossier ? "brand" : "soft"} className="mt-3 w-full py-3" onClick={tryDossier}>
-          <FileText size={16} aria-hidden="true" /> {canDossier ? "Télécharger mon dossier 12 mois" : "Débloquer avec l'offre Annuelle"}
+          <FileText size={16} aria-hidden="true" /> {canDossier ? "Télécharger mon dossier 12 mois" : "Débloquer avec Boutique ou l'annuel"}
         </Btn>
       </section>
     </div>

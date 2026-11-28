@@ -11,11 +11,12 @@
  * Ce module ne dépend pas de Netlify : stockage et réseau sont injectés (testable).
  */
 
-export type PaidPlan = "pro" | "year" | "life";
+export type PaidPlan = "pro" | "shop" | "year" | "life";
 
 export const PRICES: Record<PaidPlan, { amount: number; days: number | null; label: string }> = {
-  pro: { amount: 2000, days: 31, label: "Premium mensuel" },
-  year: { amount: 15000, days: 366, label: "Premium annuel" },
+  pro: { amount: 5000, days: 31, label: "Essentiel mensuel" },
+  shop: { amount: 12000, days: 31, label: "Boutique mensuel" },
+  year: { amount: 50000, days: 366, label: "Essentiel annuel" },
   life: { amount: 25000, days: null, label: "Premium a vie" },
 };
 
@@ -57,7 +58,7 @@ export const enabled = (env: Env) => Boolean(env.apikey && env.siteId);
 const DEVICE_RE = /^[a-z0-9]{12,40}$/i;
 const TX_RE = /^IC[A-Z0-9]{10,30}$/;
 
-export const isPlan = (p: unknown): p is PaidPlan => p === "pro" || p === "year" || p === "life";
+export const isPlan = (p: unknown): p is PaidPlan => p === "pro" || p === "shop" || p === "year" || p === "life";
 export const isDevice = (d: unknown): d is string => typeof d === "string" && DEVICE_RE.test(d);
 export const isTx = (t: unknown): t is string => typeof t === "string" && TX_RE.test(t);
 

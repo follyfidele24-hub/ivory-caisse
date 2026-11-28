@@ -5,7 +5,7 @@ import type { Plan, TrialInfo } from "./store";
  * Statistiques anonymes : un identifiant aléatoire par téléphone, la version, le plan et l'état de l'essai.
  * Jamais de nom, de numéro, de montant ni de donnée commerciale.
  */
-export const APP_VERSION = "2.10.0";
+export const APP_VERSION = "2.11.0";
 const API = Capacitor.isNativePlatform() ? "https://ivory-caisse.netlify.app" : "";
 const ID_KEY = "ivorycaisse_sid";
 const LAST_KEY = "ivorycaisse_sping";

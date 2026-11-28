@@ -67,7 +67,18 @@ export interface Product {
   ts: number;
 }
 
-export type Plan = "free" | "pro" | "year" | "life";
+export type Plan = "free" | "pro" | "shop" | "year" | "life";
+
+/* Droits par formule (tarifs v2, 2.11.0)
+   - Découverte (free) : 1 vendeur, journal 7 jours
+   - Essentiel (pro) et Essentiel annuel (year) : 2 vendeurs, journal 7 jours
+   - Boutique (shop) et À vie (life, ancienne offre) : vendeurs illimités, journal complet
+   - Dossier 12 mois pour un prêt : Boutique, Essentiel annuel, À vie */
+export const MAX_STAFF = 8;
+export const staffLimit = (p: Plan | undefined): number =>
+  p === "shop" || p === "life" ? MAX_STAFF : p === "pro" || p === "year" ? 2 : 1;
+export const fullJournal = (p: Plan | undefined) => p === "shop" || p === "life";
+export const hasDossier = (p: Plan | undefined) => p === "shop" || p === "year" || p === "life";
 
 export interface Profile {
   name: string;
@@ -114,6 +125,8 @@ export interface Profile {
 export const TRIAL_DAYS = 7;
 /** En gratuit, seul le premier vendeur créé garde son accès */
 export const FREE_STAFF = 1;
+/** Pendant l'essai, l'app se comporte comme la formule la plus complète */
+export const TRIAL_PLAN: Plan = "shop";
 
 export interface TrialInfo {
   /** Essai en cours : l'app se comporte comme en Premium */
@@ -225,10 +238,11 @@ export function expectedCash(txns: Txn[], debts: Debt[], who: string | null, fro
 }
 
 export const PLAN_LABEL: Record<Plan, string> = {
-  free: "Gratuit",
-  pro: "Premium",
-  year: "Premium Annuel",
-  life: "À Vie",
+  free: "Découverte",
+  pro: "Essentiel",
+  shop: "Boutique",
+  year: "Essentiel annuel",
+  life: "À vie",
 };
 
 export const debtBalance = (d: Debt): number =>
@@ -270,12 +284,12 @@ type Res = { ok: true } | { ok: false; why: string };
 interface StoreShape {
   launched: boolean;
   markLaunched: () => void;
-  /** Profil vu par l'app : pendant l'essai, plan = "pro" */
+  /** Profil vu par l'app : pendant l'essai, plan = TRIAL_PLAN */
   profile: Profile | null;
   /** Plan réellement payé (sans l'essai) */
   paidPlan: Plan;
   trial: TrialInfo;
-  /** false si ce vendeur dépasse la limite du gratuit (accès en pause) */
+  /** false si ce vendeur dépasse la limite de la formule (accès en pause) */
   staffAllowed: (name: string) => boolean;
   txns: Txn[];
   debts: Debt[];
@@ -538,9 +552,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [state.profile]);
 
   const trial = trialInfo(state.profile);
-  const effFree = state.profile?.plan === "free" && !trial.active;
+  const effPlan: Plan = trial.active ? TRIAL_PLAN : (state.profile?.plan ?? "free");
   const sortedStaff = [...state.staff].sort((a, b) => a.created - b.created);
-  const staffAllowed = (name: string) => !effFree || sortedStaff.findIndex((x) => x.name === name) < FREE_STAFF;
+  const staffAllowed = (name: string) => sortedStaff.findIndex((x) => x.name === name) < staffLimit(effPlan);
 
   const rolesOn = Boolean(state.profile?.pin) && state.staff.some((x) => x.active);
   /* Un nom de vendeur retiré ou désactivé ne garde aucun droit */
@@ -568,7 +582,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
     return {
       launched: state.launched,
-      profile: trial.active && state.profile ? { ...state.profile, plan: "pro" } : state.profile,
+      profile: trial.active && state.profile ? { ...state.profile, plan: TRIAL_PLAN } : state.profile,
       paidPlan: state.profile?.plan ?? "free",
       trial,
       staffAllowed,

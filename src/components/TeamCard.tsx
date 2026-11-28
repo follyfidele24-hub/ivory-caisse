@@ -1,14 +1,12 @@
 import { useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { Copy, KeyRound, Lock, Pause, Play, ScrollText, ShieldCheck, Trash2, UserPlus, Users } from "lucide-react";
-import { useStore } from "../lib/store";
+import { MAX_STAFF, PLAN_LABEL, staffLimit, useStore } from "../lib/store";
 import { fmtF } from "../lib/format";
 import { shareText } from "../lib/receipt";
 import { Btn, Sheet } from "./ui";
 import Control from "./Control";
 
-const FREE_STAFF = 1;
-const MAX_STAFF = 8;
 
 /** Le patron gère son équipe : un accès par vendeur avec son PIN, les règles, le contrôle. */
 export default function TeamCard({ onPremium, notify }: { onPremium: () => void; notify: (m: string) => void }) {
@@ -24,9 +22,10 @@ export default function TeamCard({ onPremium, notify }: { onPremium: () => void;
   const [rMin, setRMin] = useState(String(rules.cancelMin));
   const [rDay, setRDay] = useState(String(rules.cancelPerDay));
 
-  const free = profile?.plan === "free";
+  const lim = staffLimit(profile?.plan);
+  const capped = lim < MAX_STAFF;
   const hasPin = Boolean(profile?.pin);
-  const limitReached = staff.length >= (free ? FREE_STAFF : MAX_STAFF);
+  const limitReached = staff.length >= lim;
   const legacy = sellers.filter((s) => !staff.some((x) => x.name === s));
   const pending = txns.filter((t) => t.review === "pending").length;
   const field = "rounded-2xl border border-line bg-panel2 px-4 py-3 text-sm font-semibold outline-none transition-colors placeholder:text-fg/30 focus:border-brand/50";
@@ -83,7 +82,7 @@ export default function TeamCard({ onPremium, notify }: { onPremium: () => void;
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold">{s.name}</p>
                 <p className={`text-[11px] font-semibold ${s.active && staffAllowed(s.name) ? "text-mint" : "text-muted"}`}>
-                  {!s.active ? "Accès suspendu" : staffAllowed(s.name) ? "Accès actif" : "En pause · Premium pour le réactiver"}
+                  {!s.active ? "Accès suspendu" : staffAllowed(s.name) ? "Accès actif" : "En pause · Boutique pour le réactiver"}
                 </p>
               </div>
               <button onClick={() => { setPinFor(s.name); setNewPin(""); setErr(null); }} className="tap btn-press flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-panel" aria-label={`Nouveau PIN pour ${s.name}`} title="Nouveau PIN">
@@ -122,9 +121,9 @@ export default function TeamCard({ onPremium, notify }: { onPremium: () => void;
       )}
 
       {hasPin &&
-        (limitReached && free ? (
+        (limitReached && capped ? (
           <button onClick={onPremium} className="tap btn-press mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-brand/30 bg-brand/10 px-3 text-sm font-bold text-brand2">
-            <Lock size={14} aria-hidden="true" /> Gratuit : {FREE_STAFF} vendeur · vendeurs illimités en Premium
+            <Lock size={14} aria-hidden="true" /> {PLAN_LABEL[profile?.plan ?? "free"]} : {lim} vendeur{lim > 1 ? "s" : ""} · illimités avec Boutique
           </button>
         ) : limitReached ? null : (
           <div className="mt-3">
