@@ -57,6 +57,15 @@ export default function Premium({ onClose, initialStep = "plans" }: { onClose: (
       setStep("key");
       return;
     }
+    /* Formule sans page Chariow (produit pas encore créé) : la commande passe par WhatsApp */
+    if (!online && !chosen.chariowUrl) {
+      window.open(
+        whatsappLink(`Bonjour, je veux la formule ${chosen.name} d'Ivory Caisse (${chosen.price} ${chosen.per}). Boutique : ${profile?.shop ?? ""}.`),
+        "_blank",
+        "noopener"
+      );
+      return;
+    }
     if (!online) {
       setPayError(
         online === false
@@ -246,7 +255,7 @@ export default function Premium({ onClose, initialStep = "plans" }: { onClose: (
                   </>
                 ) : (
                   <>
-                    Payer {chosen.price}
+                    {!online && !chosen.chariowUrl ? `Commander sur WhatsApp · ${chosen.price}` : `Payer ${chosen.price}`}
                     {!online && chosen.chariowUrl ? <ExternalLink size={16} aria-hidden="true" /> : <Sparkles size={16} aria-hidden="true" />}
                   </>
                 )}
@@ -255,7 +264,9 @@ export default function Premium({ onClose, initialStep = "plans" }: { onClose: (
               {payError && <p className="mt-4 text-center text-xs font-semibold text-rose">{payError}</p>}
 
               <p className="mt-4 text-center text-[11px] leading-relaxed text-muted">
-                {online
+                {!online && !chosen.chariowUrl
+                  ? "Écris-nous sur WhatsApp : on t'envoie le lien de paiement Mobile Money, puis ta clé à coller dans « J'ai une clé »."
+                  : online
                   ? "Après validation sur ton téléphone, reviens dans l'app : Premium s'active automatiquement."
                   : "Tu vas payer sur la boutique officielle Ivory Gestion (Chariow). Ta clé Premium arrive par e-mail : reviens ensuite ici et touche « J'ai une clé »."}
               </p>
