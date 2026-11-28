@@ -8,7 +8,7 @@
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Ivory Caisse — La caisse hors-ligne du commerçant africain (FCFA)</title>
-<meta name="description" content="Ventes, dépenses, crédits clients, stock : Ivory Caisse remplace ton cahier, même sans réseau. Pensée pour les boutiques, étals et maquis d'Abidjan et d'Afrique de l'Ouest. Gratuit pour commencer, Premium dès 2 000 F/mois." />
+<meta name="description" content="Ventes, dépenses, crédits clients, stock : Ivory Caisse remplace ton cahier, même sans réseau. Pensée pour les boutiques, étals et maquis d'Abidjan et d'Afrique de l'Ouest. Gratuit pour commencer, Essentiel dès 5 000 F/mois." />
 <!-- TODO(domaine) : si un domaine propre est acheté, revoir canonical, og:url, og:image, JSON-LD, sitemap, robots et HSTS preload. -->
 <link rel="canonical" href="https://ivory-caisse.netlify.app/" />
 <meta name="theme-color" content="#f6f7fa" media="(prefers-color-scheme: light)" />
@@ -52,9 +52,9 @@
       "publisher": { "@type": "Organization", "name": "Ivory Gestion" },
       "offers": [
         { "@type": "Offer", "name": "Gratuit", "price": "0", "priceCurrency": "XOF", "description": "Ventes, dépenses et stock illimités, 5 clients crédit, historique 30 jours, 100 % hors-ligne." },
-        { "@type": "Offer", "name": "Premium mensuel", "price": "2000", "priceCurrency": "XOF", "description": "Crédits illimités, marge par article, vendeurs illimités, exports PDF et Excel." },
-        { "@type": "Offer", "name": "Premium annuel", "price": "15000", "priceCurrency": "XOF", "description": "Tout le Premium, dossier de prêt 12 mois, prise en main de 30 minutes par WhatsApp." },
-        { "@type": "Offer", "name": "Premium à vie", "price": "25000", "priceCurrency": "XOF", "description": "Tout le Premium, payé une seule fois, mises à jour à vie, support prioritaire." }
+        { "@type": "Offer", "name": "Essentiel", "price": "5000", "priceCurrency": "XOF", "description": "Par mois. Crédits illimités, relances WhatsApp, marge par article, 2 vendeurs, exports PDF et Excel." },
+        { "@type": "Offer", "name": "Boutique", "price": "12000", "priceCurrency": "XOF", "description": "Par mois. Tout l'Essentiel, vendeurs illimités, journal complet de l'équipe, dossier de prêt 12 mois." },
+        { "@type": "Offer", "name": "Essentiel annuel", "price": "50000", "priceCurrency": "XOF", "description": "Par an, 2 mois offerts. Tout l'Essentiel et le dossier de prêt 12 mois." }
       ]
     },
     {
@@ -62,7 +62,7 @@
       "mainEntity": [
         { "@type": "Question", "name": "Ça marche vraiment sans internet ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui. Ventes, dépenses, crédits et stock sont enregistrés dans le téléphone. Coupe le réseau : l'application continue de fonctionner. Internet ne sert qu'à activer le Premium." } },
         { "@type": "Question", "name": "Et si je perds ou on me vole mon téléphone ?", "acceptedAnswer": { "@type": "Answer", "text": "Fais une sauvegarde dans Réglages, puis « Sauvegarder dans un fichier », et envoie-la sur ton WhatsApp. Sur un nouveau téléphone, « Restaurer une sauvegarde » remet ventes, dépenses, crédits et stock." } },
-        { "@type": "Question", "name": "Combien coûte Ivory Caisse ?", "acceptedAnswer": { "@type": "Answer", "text": "Gratuit pour toujours avec 7 jours de Premium offerts. Ensuite Premium à 2 000 F par mois, 15 000 F par an ou 25 000 F une seule fois." } },
+        { "@type": "Question", "name": "Combien coûte Ivory Caisse ?", "acceptedAnswer": { "@type": "Answer", "text": "Gratuit pour toujours avec 7 jours de Boutique offerts. Ensuite Essentiel à 5 000 F par mois, Boutique à 12 000 F par mois, ou Essentiel annuel à 50 000 F (2 mois offerts)." } },
         { "@type": "Question", "name": "Je peux l'utiliser avec mes vendeuses ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui. Dans « Mon équipe », tu crées un accès avec un PIN par vendeur. Il encaisse et note les crédits, mais ne modifie ni le stock ni les prix, et ne voit pas tes marges. Chaque action est journalisée." } },
         { "@type": "Question", "name": "Comment je paie l'abonnement ?", "acceptedAnswer": { "@type": "Answer", "text": "Depuis l'application : tu choisis ta formule, tu paies sur la page sécurisée de la boutique Ivory Gestion (Wave, Orange Money, MTN MoMo, Moov Money), puis tu colles la clé reçue par e-mail." } },
         { "@type": "Question", "name": "C'est disponible sur Google Play ?", "acceptedAnswer": { "@type": "Answer", "text": "L'application s'installe directement depuis le site, sans passer par un store. Une version Google Play est en préparation." } }
@@ -971,7 +971,7 @@ input[type="range"]::-moz-range-thumb{
     <div class="section-head rv">
       <p class="eyebrow">Tarifs en francs CFA</p>
       <h2 id="prix-t">Gratuit pour toujours. Premium quand ton commerce le réclame.</h2>
-      <p class="lead">7 jours de Premium offerts à l'inscription. Ensuite, tu choisis — et si tu arrêtes, <strong>rien n'est effacé</strong> : l'app repasse simplement en gratuit.</p>
+      <p class="lead">7 jours de Boutique offerts à l'inscription. Ensuite, tu choisis — et si tu arrêtes, <strong>rien n'est effacé</strong> : l'app repasse simplement en gratuit.</p>
     </div>
 
     <div class="paylogos rv" aria-label="Moyens de paiement acceptés">
@@ -995,57 +995,58 @@ input[type="range"]::-moz-range-thumb{
           <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M20 6 9 17l-5-5"/></svg></span><span>100&nbsp;% hors-ligne</span></li>
         </ul>
         <a class="btn btn--secondary btn--block" href="#installer" data-cta="plan-free">Commencer gratuitement</a>
-        <p class="plan__foot">7 jours de Premium inclus au départ</p>
+        <p class="plan__foot">7 jours de Boutique inclus au départ</p>
       </article>
 
       <article class="plan plan--pop">
         <span class="plan__flag">Recommandé</span>
-        <p class="plan__name">Premium</p>
-        <p class="plan__price"><b>2&nbsp;000&nbsp;F</b><span>/ mois</span></p>
+        <p class="plan__name">Essentiel</p>
+        <p class="plan__price"><b>5&nbsp;000&nbsp;F</b><span>/ mois</span></p>
         <ul>
           <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Clients crédit illimités</b></span></li>
           <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M20 6 9 17l-5-5"/></svg></span><span>Liste « à relancer » + WhatsApp en 1 geste</span></li>
           <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M20 6 9 17l-5-5"/></svg></span><span>Marge par article et top 5</span></li>
           <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M20 6 9 17l-5-5"/></svg></span><span>Reçu à ton nom (ville, numéro)</span></li>
-          <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M20 6 9 17l-5-5"/></svg></span><span>Vendeurs illimités, chacun son PIN</span></li>
+          <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M20 6 9 17l-5-5"/></svg></span><span>2 vendeurs, chacun son PIN</span></li>
           <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M20 6 9 17l-5-5"/></svg></span><span>Historique complet + rapports du mois</span></li>
           <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M20 6 9 17l-5-5"/></svg></span><span>Export PDF &amp; Excel</span></li>
         </ul>
-        <a class="btn btn--primary btn--block" href="#installer" data-cta="plan-month">Passer Premium</a>
-        <p class="plan__foot">Soit moins de 70 F par jour</p>
+        <a class="btn btn--primary btn--block" href="#installer" data-cta="plan-month">Prendre l'Essentiel</a>
+        <p class="plan__foot">Soit 167 F par jour</p>
       </article>
 
       <article class="plan">
-        <p class="plan__name">Annuel</p>
-        <p class="plan__price"><b>15&nbsp;000&nbsp;F</b><span>/ an</span></p>
-        <p class="plan__save">Économise 37&nbsp;% — 3 mois offerts</p>
+        <p class="plan__name">Boutique</p>
+        <p class="plan__price"><b>12&nbsp;000&nbsp;F</b><span>/ mois</span></p>
         <ul>
-          <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Tout le Premium</b></span></li>
+          <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Tout l'Essentiel</b></span></li>
+          <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M20 6 9 17l-5-5"/></svg></span><span>Vendeurs illimités, chacun son PIN</span></li>
+          <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M20 6 9 17l-5-5"/></svg></span><span>Journal complet de l'équipe</span></li>
           <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M20 6 9 17l-5-5"/></svg></span><span>Dossier 12 mois pour un prêt</span></li>
-          <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M20 6 9 17l-5-5"/></svg></span><span>Prise en main de 30 min par WhatsApp</span></li>
+          <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M20 6 9 17l-5-5"/></svg></span><span>Support prioritaire WhatsApp</span></li>
         </ul>
-        <a class="btn btn--secondary btn--block" href="#installer" data-cta="plan-year">Prendre l'Annuel</a>
-        <p class="plan__foot">Recommandé si tu as des vendeuses</p>
+        <a class="btn btn--secondary btn--block" href="#installer" data-cta="plan-shop">Prendre Boutique</a>
+        <p class="plan__foot">Pour un commerce avec une équipe</p>
       </article>
 
       <article class="plan">
-        <p class="plan__name">À vie</p>
-        <p class="plan__price"><b>25&nbsp;000&nbsp;F</b><span>une seule fois</span></p>
+        <p class="plan__name">Essentiel annuel</p>
+        <p class="plan__price"><b>50&nbsp;000&nbsp;F</b><span>/ an</span></p>
+        <p class="plan__save">2 mois offerts</p>
         <ul>
-          <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Tout le Premium, pour toujours</b></span></li>
+          <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Tout l'Essentiel pendant 12 mois</b></span></li>
           <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M20 6 9 17l-5-5"/></svg></span><span>Dossier 12 mois pour un prêt</span></li>
-          <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M20 6 9 17l-5-5"/></svg></span><span>Mises à jour à vie</span></li>
-          <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M20 6 9 17l-5-5"/></svg></span><span>Support prioritaire</span></li>
+          <li><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M20 6 9 17l-5-5"/></svg></span><span>Le prix ne bouge pas pendant 1 an</span></li>
         </ul>
-        <a class="btn btn--secondary btn--block" href="#installer" data-cta="plan-life">Payer une seule fois</a>
-        <p class="plan__foot">Rentabilisé en 12 mois et demi</p>
+        <a class="btn btn--secondary btn--block" href="#installer" data-cta="plan-year">Prendre l'annuel</a>
+        <p class="plan__foot">Soit 4 167 F par mois</p>
       </article>
     </div>
 
     <div class="guarantee rv">
       <span class="feature__ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 5-3.2 8.4-7 10-3.8-1.6-7-5-7-10V6l7-3Z"/><path d="m9 12 2 2 4-4"/></svg></span>
       <div>
-        <p><b>Garantie 7 jours, mains propres.</b> Tu testes le Premium gratuitement pendant 7 jours. Si ça ne te convient pas, tu ne paies rien et tes données restent sur ton téléphone. Aucun prélèvement automatique caché : chaque mois, c'est toi qui renouvelles.</p>
+        <p><b>Garantie 7 jours, mains propres.</b> Tu testes la formule Boutique gratuitement pendant 7 jours. Si ça ne te convient pas, tu ne paies rien et tes données restent sur ton téléphone. Aucun prélèvement automatique caché : chaque mois, c'est toi qui renouvelles.</p>
       </div>
     </div>
   </div>
@@ -1062,7 +1063,7 @@ input[type="range"]::-moz-range-thumb{
         <div class="roi__out" aria-live="polite">
           <div class="roi__big"><b id="roi-year">377 000 F</b><span id="roi-sub">récupérés sur 12 mois</span></div>
           <div class="line"><span>Soit par mois</span><b id="roi-month">31 400 F</b></div>
-          <div class="line"><span>Coût d'Ivory Caisse Premium</span><b id="roi-cost">2 000 F / mois</b></div>
+          <div class="line"><span>Coût d'Ivory Caisse Premium</span><b id="roi-cost">5 000 F / mois</b></div>
           <div class="line"><span>Retour sur investissement</span><b id="roi-roi">× 15,7</b></div>
           <small>Estimation basée sur 2&nbsp;% de fuites récupérées et 6&nbsp;% de crédits mieux recouvrés. À ajuster avec tes vrais chiffres.</small>
         </div>
@@ -1169,7 +1170,7 @@ input[type="range"]::-moz-range-thumb{
       </details>
       <details>
         <summary>Comment je paie l'abonnement ?<span class="plus" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></summary>
-        <div class="ans"><p>Depuis l'application : tu choisis ta formule, tu paies sur la page sécurisée de la boutique Ivory Gestion (Wave, Orange Money, MTN MoMo, Moov Money), puis tu colles la clé reçue par e-mail. À partir de 2 000 F par mois, ou 25 000 F une seule fois pour la version à vie.</p></div>
+        <div class="ans"><p>Depuis l'application : tu choisis ta formule, tu paies sur la page sécurisée de la boutique Ivory Gestion (Wave, Orange Money, MTN MoMo, Moov Money), puis tu colles la clé reçue par e-mail. Essentiel à 5 000 F par mois, Boutique à 12 000 F par mois, ou 50 000 F pour un an (2 mois offerts).</p></div>
       </details>
       <details>
         <summary>J'ai payé mais ma clé ne marche pas. Je fais quoi ?<span class="plus" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></summary>
@@ -1251,7 +1252,7 @@ input[type="range"]::-moz-range-thumb{
 </footer>
 
 <div class="sticky-cta" id="sticky" aria-hidden="true">
-  <p><b>Gratuit pour toujours</b>Sans pub · 7 jours de Premium offerts</p>
+  <p><b>Gratuit pour toujours</b>Sans pub · 7 jours de Boutique offerts</p>
   <a class="btn btn--primary" href="#tarifs" data-cta="sticky">Créer ma caisse</a>
 </div>
 
@@ -1365,7 +1366,7 @@ input[type="range"]::-moz-range-thumb{
     clientsOut.textContent = clients.value;
     roiYear.textContent = year.toLocaleString('fr-FR').replace(/\u202f|\u00a0/g,' ') + ' F';
     roiMonth.textContent = monthly.toLocaleString('fr-FR').replace(/\u202f|\u00a0/g,' ') + ' F';
-    var plan = +ca.value >= 1500000 ? 15000/12 : (year >= 25000*2 ? 15000/12 : 2000);
+    var plan = +ca.value >= 1500000 ? 50000/12 : 5000;
     roiCost.textContent = Math.round(plan).toLocaleString('fr-FR').replace(/\u202f|\u00a0/g,' ') + ' F / mois';
     roiRoi.textContent = '× ' + (monthly/plan).toFixed(1).replace('.', ',');
   }
