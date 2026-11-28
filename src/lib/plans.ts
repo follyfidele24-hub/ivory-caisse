@@ -56,7 +56,7 @@ export const PLANS: PlanDef[] = [
     price: "5 000 F",
     amount: 5000,
     per: "/ mois",
-    tag: "Le plus choisi",
+    tag: "Recommandé",
     highlight: true,
     features: ESSENTIEL,
     chariowUrl: CHARIOW_V2.pro ? `${CHARIOW_STORE}/${CHARIOW_V2.pro}` : undefined,
