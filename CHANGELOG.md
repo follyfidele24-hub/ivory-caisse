@@ -1,5 +1,13 @@
 # Ivory Caisse — Journal des changements
 
+## 2.11.0 — tarifs v2 : Essentiel, Boutique, Essentiel annuel
+
+- Nouvelle grille : Découverte 0 F, Essentiel 5 000 F/mois, Boutique 12 000 F/mois, Essentiel annuel 50 000 F/an (2 mois offerts).
+- « À vie » n'est plus vendu. Les licences à vie déjà émises gardent tous leurs droits (bannière « accès à vie actif »).
+- Vrais verrous par formule : vendeurs (Découverte 1, Essentiel 2, Boutique illimités), journal complet (Boutique), dossier 12 mois pour un prêt (Boutique, annuel).
+- L'essai de 7 jours se fait sur la formule Boutique.
+- Les licences de l'ancienne grille restent reconnues jusqu'à leur échéance.
+
 ## 2.10.0 — compteur anonyme, essai de 7 jours
 
 - Essai Premium ramené à 7 jours (carte « Garder » à 3 jours de la fin).

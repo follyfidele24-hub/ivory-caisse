@@ -18,63 +18,72 @@ export interface PlanDef {
 export const CHARIOW_STORE = "https://nunovjiz.mychariow.shop";
 
 /* Uniquement ce que l'app fait vraiment : chaque ligne correspond à un verrou dans le code
-   (Debts FREE_LIMIT, History "Tout", Reports "Mois", exports). Le cloud n'apparaît que s'il est branché. */
-const PREMIUM_FEATURES = [
+   (Debts FREE_LIMIT, History "Tout", Reports "Mois", exports, staffLimit, fullJournal, hasDossier).
+   Le cloud n'apparaît que s'il est branché. Les 4 premières lignes sont celles affichées sur la carte. */
+const ESSENTIEL = [
   "Clients crédit illimités",
   "Liste « à relancer » + WhatsApp en 1 geste",
   "Marge par article et top 5",
+  "2 vendeurs, chacun son PIN",
   "Reçu à ton nom (ville, numéro, message)",
-  "Vendeurs illimités, chacun son PIN",
-  "Journal complet de l'équipe (sans limite)",
   "Historique complet",
   "Rapports du mois",
   "Export PDF & Excel",
   ...(cloudReady ? ["Sauvegarde cloud"] : []),
 ];
 
-/* Annuel et À vie : vérifiés dans Reports (plan "year" | "life") */
-const LONG_EXTRAS = ["Dossier 12 mois pour un prêt (microfinance, banque)"];
+const DOSSIER = "Dossier 12 mois pour un prêt (microfinance, banque)";
+
+/* Produits Chariow de la grille v2 : renseignés dès leur création (voir netlify/lib/licenseCore.ts) */
+export const CHARIOW_V2 = {
+  pro: "",
+  shop: "",
+  year: "",
+};
 
 export const PLANS: PlanDef[] = [
   {
     id: "free",
-    name: "Gratuit",
+    name: "Découverte",
     price: "0 F",
     amount: 0,
     per: "pour toujours",
-    features: ["7 jours de Premium offerts au départ", "Ventes, dépenses & stock illimités", "5 clients crédit", "1 vendeur avec son PIN + journal 7 jours", "Rapports jour et semaine", "Historique 30 jours", "100% hors-ligne"],
+    features: ["7 jours de Boutique offerts au départ", "Ventes, dépenses & stock illimités", "5 clients crédit", "1 vendeur avec son PIN + journal 7 jours", "Rapports jour et semaine", "Historique 30 jours", "100% hors-ligne"],
   },
   {
     id: "pro",
-    name: "Premium",
-    price: "2 000 F",
-    amount: 2000,
+    name: "Essentiel",
+    price: "5 000 F",
+    amount: 5000,
     per: "/ mois",
-    tag: "Recommandé",
+    tag: "Le plus choisi",
     highlight: true,
-    features: PREMIUM_FEATURES,
-    chariowUrl: "https://nunovjiz.mychariow.shop/prd_ewwwyub0",
+    features: ESSENTIEL,
+    chariowUrl: CHARIOW_V2.pro ? `${CHARIOW_STORE}/${CHARIOW_V2.pro}` : undefined,
+  },
+  {
+    id: "shop",
+    name: "Boutique",
+    price: "12 000 F",
+    amount: 12000,
+    per: "/ mois",
+    tag: "Avec une équipe",
+    features: ["Tout l'Essentiel", "Vendeurs illimités, chacun son PIN", "Journal complet de l'équipe", DOSSIER, "Support prioritaire WhatsApp"],
+    chariowUrl: CHARIOW_V2.shop ? `${CHARIOW_STORE}/${CHARIOW_V2.shop}` : undefined,
   },
   {
     id: "year",
-    name: "Annuel",
-    price: "15 000 F",
-    amount: 15000,
+    name: "Essentiel annuel",
+    price: "50 000 F",
+    amount: 50000,
     per: "/ an",
-    tag: "Économise 37%",
-    features: ["Tout le Premium", ...LONG_EXTRAS, "Prise en main de 30 min par WhatsApp"],
-    chariowUrl: "https://nunovjiz.mychariow.shop/prd_h95p8e2k",
-  },
-  {
-    id: "life",
-    name: "À Vie",
-    price: "25 000 F",
-    amount: 25000,
-    per: "une seule fois",
-    features: ["Tout le Premium", ...LONG_EXTRAS, "Payé une seule fois", "Mises à jour à vie", "Support prioritaire"],
-    chariowUrl: "https://nunovjiz.mychariow.shop/prd_8e5bj3vn",
+    tag: "2 mois offerts",
+    features: ["Tout l'Essentiel pendant 12 mois", "2 mois offerts (4 167 F/mois)", DOSSIER, "Le prix ne bouge pas pendant 1 an"],
+    chariowUrl: CHARIOW_V2.year ? `${CHARIOW_STORE}/${CHARIOW_V2.year}` : undefined,
   },
 ];
+/* « À vie » n'est plus vendu (tarifs v2). Le plan "life" reste reconnu partout dans le code :
+   une licence à vie déjà achetée garde tous ses droits. */
 
 /** Moyens de paiement mobile money affichés — logos 16:9 dans public/payments/ */
 export const PAYMENTS: { name: string; color: string; short: string; logo: string }[] = [

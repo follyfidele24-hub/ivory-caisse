@@ -128,6 +128,13 @@ export default function Premium({ onClose, initialStep = "plans" }: { onClose: (
               </h1>
               <p className="mt-2 text-sm text-muted">Paiement par Wave, Orange Money, MTN MoMo ou Moov. Annulation quand tu veux.</p>
 
+              {paidPlan === "life" && (
+                <div className="mt-6 flex items-start gap-3 rounded-2xl border border-mint/30 bg-mint/10 p-4">
+                  <ShieldCheck size={18} className="mt-0.5 shrink-0 text-mint" aria-hidden="true" />
+                  <p className="text-sm font-semibold">Ton accès à vie est actif : tu n'as rien à payer. Tu gardes tout le Premium, équipe et dossier compris.</p>
+                </div>
+              )}
+
               <div className="mt-7 space-y-3">
                 {PLANS.map((p, i) => {
                   const isCurrent = p.id === current;

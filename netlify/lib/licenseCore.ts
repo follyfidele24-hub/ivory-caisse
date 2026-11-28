@@ -10,13 +10,18 @@
  * Module sans dépendance Netlify : stockage et réseau injectés (testable).
  */
 
-export type LicPlan = "pro" | "year" | "life";
+export type LicPlan = "pro" | "shop" | "year" | "life";
 
 /** Produits Chariow → formule Ivory Caisse */
 export const PRODUCTS: Record<string, LicPlan> = {
+  /* Grille v1 : plus vendue, mais les licences émises restent valables jusqu'à leur échéance */
   prd_ewwwyub0: "pro", // Mensuel 2 000 F, 31 jours
   prd_h95p8e2k: "year", // Annuel 15 000 F, 366 jours
-  prd_8e5bj3vn: "life", // À vie 25 000 F
+  prd_8e5bj3vn: "life", // À vie 25 000 F (dépublié)
+  /* Grille v2 (2.11.0) : ajouter ici les identifiants des produits Chariow */
+  // prd_XXXX: "pro",  // Essentiel 5 000 F, 31 jours
+  // prd_XXXX: "shop", // Boutique 12 000 F, 31 jours
+  // prd_XXXX: "year", // Essentiel annuel 50 000 F, 366 jours
 };
 
 export interface LicEnv {

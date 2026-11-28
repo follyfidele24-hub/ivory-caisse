@@ -23,7 +23,7 @@ const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store", ...CORS } });
 
 type Trial = "none" | "active" | "ended";
-type Plan = "free" | "pro" | "year" | "life";
+type Plan = "free" | "pro" | "shop" | "year" | "life";
 interface Device {
   first: number;
   last: number;
@@ -38,7 +38,7 @@ interface Device {
 }
 
 const ID_RE = /^[a-f0-9-]{36}$/;
-const PLANS: Plan[] = ["free", "pro", "year", "life"];
+const PLANS: Plan[] = ["free", "pro", "shop", "year", "life"];
 const TRIALS: Trial[] = ["none", "active", "ended"];
 const DAY = 86_400_000;
 

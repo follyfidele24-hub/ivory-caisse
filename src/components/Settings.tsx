@@ -244,6 +244,16 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
         </button>
       </div>
 
+      {!isFree && !trial.active && (
+        <button
+          onClick={onPremium}
+          className="tap btn-press mb-4 flex min-h-11 w-full items-center justify-between gap-3 rounded-2xl border border-line bg-panel2 px-4 py-3 text-left text-sm font-bold"
+        >
+          <span>Ma formule : {PLAN_LABEL[profile?.plan ?? "free"]}</span>
+          <span className="flex items-center gap-1 text-xs text-brand2">Voir les formules <ChevronRight size={15} aria-hidden="true" /></span>
+        </button>
+      )}
+
       {isFree && (
         <button
           onClick={onPremium}
@@ -254,7 +264,7 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
           </div>
           <div className="flex-1">
             <p className="text-sm font-bold">Passer Premium</p>
-            <p className="text-xs text-muted">À partir de 2 000 F/mois · Mobile money</p>
+            <p className="text-xs text-muted">À partir de 5 000 F/mois · Mobile money</p>
           </div>
           <ChevronRight size={17} className="text-brand2" />
         </button>
@@ -635,7 +645,7 @@ export default function Settings({ onPremium, onBack }: { onPremium: () => void;
           <BrandMark size={40} />
           <div className="flex-1">
             <p className="text-sm font-bold">Ivory Caisse</p>
-            <p className="text-xs text-muted">Version 2.10.0 · Membre depuis le {profile ? longDate(profile.created) : "—"}</p>
+            <p className="text-xs text-muted">Version 2.11.0 · Membre depuis le {profile ? longDate(profile.created) : "—"}</p>
           </div>
         </div>
         {/* Éditeur */}

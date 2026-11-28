@@ -35,7 +35,7 @@ const DOCS: Record<LegalDoc, { title: string; intro: string; sections: Section[]
       },
       {
         h: "4. Abonnement Premium & paiements",
-        p: "Certaines fonctions nécessitent une licence Premium (mensuelle, annuelle ou à vie). Le paiement se fait sur la boutique en ligne Ivory Gestion, opérée par Chariow, qui encaisse le mobile money et les cartes. Une clé d'activation est envoyée par e-mail. Les licences sont des achats uniques, sans renouvellement automatique.",
+        p: "Certaines fonctions nécessitent une licence Premium (Essentiel ou Boutique, au mois, ou Essentiel annuel). Le paiement se fait sur la boutique en ligne Ivory Gestion, opérée par Chariow, qui encaisse le mobile money et les cartes. Une clé d'activation est envoyée par e-mail. Les licences sont des achats uniques, sans renouvellement automatique.",
       },
       {
         h: "5. Utilisation acceptable",
